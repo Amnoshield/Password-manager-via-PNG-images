@@ -127,7 +127,6 @@ def create_Order3(width:int, hight:int, key:str, colors:int = 4, bits:int = 3)->
 def loading_screen(text:str = 'Please wait...'):
 	def decorator(func):
 		def inner(*args, **kwargs):
-			print(text)
 			global loading_screen_label
 			global loading_frame
 			global root
@@ -157,7 +156,7 @@ class ListEntry:
 	def __init__(self, master, text:list[str] = ['', '', '', ''], make_pass = False):
 		global list_entries
 
-		if make_pass == True: text[1] = gen_pass()
+		if make_pass == True: text[1] = gen_password()
 		
 		self.frame = tk.Frame(master)
 		self.frame.grid(sticky="nswe")
@@ -344,7 +343,8 @@ def finish_pass(text:tk.Entry, root):
 	password = text.get()
 	root.destroy()
 
-def get_pass(root) -> None:
+@loading_screen('Please enter password')
+def ask_for_pass(root) -> None:
 	top= tk.Toplevel(root)
 	top.geometry("750x250")
 	top.title("Enter Password")
@@ -374,7 +374,7 @@ def add_pass():
 	canvas.config(scrollregion=canvas.bbox('all'))
 	pass_frame.update_idletasks()
 
-def gen_pass():
+def gen_password():
 	while True:
 		password = ''.join(random.choices(k=16, population='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890!@#$%^&*()-_=+[{]};:\'",<.>/?\\|`~'))
 		if check_password_strength(password) == 100: return password
@@ -382,7 +382,6 @@ def gen_pass():
 def wipe_file():
 	global file_path
 	global num_of_bits
-
 
 	image = Image.open(file_path)
 	pixel_data = image.load()
@@ -431,7 +430,7 @@ def main() -> None:
 	load = tk.Button(details_frame, text='Load', command=load_file)
 	file_image = tk.Label(details_frame)
 	file_details = tk.Label(details_frame, text='No file selected')
-	set_pass = tk.Button(details_frame, text='Set key', command=lambda:get_pass(get_pass_frame))
+	set_pass = tk.Button(details_frame, text='Set key', command=lambda:ask_for_pass(get_pass_frame))
 	file_details.grid(row=1, column=2, pady= 10)
 	load.grid(row=1, column=1, pady= 10)
 	set_pass.grid(row=1, column=3, pady= 10)
@@ -447,8 +446,6 @@ def main() -> None:
 	filemenu.add_command()
 	filemenu.add_separator()
 	filemenu.add_command(label='Open...', command=select_file)
-	""" filemenu.add_separator()
-	filemenu.add_command(label='Exit', command=root.quit) """
 
 	#canvas
 	canvas = tk.Canvas(root)
