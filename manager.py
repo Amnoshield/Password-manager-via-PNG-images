@@ -123,9 +123,10 @@ def create_Order3(width:int, hight:int, key:str, colors:int = 4, bits:int = 3)->
 			if not len(y[randY]):
 				y.pop(randY)
 
-def sort_list(unsorted:list[str], idx:int, reverse:float=False):
+def sort_list(unsorted:list[str], idx:int):
+	
 	key = lambda a:a[idx]
-	unsorted.sort(key=key, reverse=reverse)
+	unsorted.sort(key=key)
 
 #GUI
 def loading_screen(text:str = 'Please wait...'):
@@ -200,11 +201,17 @@ class ListEntry:
 		self.frame.update_idletasks()
 
 	def top(self):
-		tk.Button(self.frame, text='Name').grid(row=0, column=0)
-		tk.Button(self.frame, text='Password').grid(row=0, column=1)
-		tk.Button(self.frame, text='Email').grid(row=0, column=2)
-		tk.Button(self.frame, text='Username').grid(row=0, column=3)
-		tk.Button(self.frame, text='Strenth').grid(row=0, column=4)
+		self.b_name = tk.Button(self.frame, text='Name', command=lambda:(sort_list(get_data(), 0), load_all()))
+		self.b_password = tk.Button(self.frame, text='Password', command=lambda:(sort_list(get_data(), 1), load_all()))
+		self.b_email = tk.Button(self.frame, text='Email', command=lambda:(sort_list(get_data(), 2), load_all()))
+		self.b_username = tk.Button(self.frame, text='Username', command=lambda:(sort_list(get_data(), 3), load_all()))
+		self.b_strenth = tk.Button(self.frame, text='Strenth', command=lambda:(sort_list(get_data(), 4), load_all()))
+		
+		self.b_name.grid(row=0, column=0)
+		self.b_password.grid(row=0, column=1)
+		self.b_email.grid(row=0, column=2)
+		self.b_username.grid(row=0, column=3)
+		self.b_strenth.grid(row=0, column=4)
 
 		for x in self.entreis:
 			x.grid(row = 1)
