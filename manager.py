@@ -196,7 +196,7 @@ class ListEntry:
 		self.frame.update_idletasks()
 
 	def top(self):
-		tk.Button(self.frame, text='Name').grid(sticky="nswe", row=0, column=0)
+		tk.Button(self.frame, text='Name').grid(row=0, column=0)
 		tk.Button(self.frame, text='Password').grid(row=0, column=1)
 		tk.Button(self.frame, text='Email').grid(row=0, column=2)
 		tk.Button(self.frame, text='Username').grid(row=0, column=3)
