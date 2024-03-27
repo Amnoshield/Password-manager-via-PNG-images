@@ -13,6 +13,35 @@ from tkinter import filedialog
 from PIL import Image, ImageTk
 from time import sleep
 
+#decorators
+def loading_screen(text:str = 'Please wait...'):
+	def decorator(func):
+		def inner(*args, **kwargs):
+			global loading_screen_label
+			global loading_frame
+			global root
+			try: loading_screen_label.destroy()
+			except: pass
+			loading_screen_label = tk.Label(loading_frame, text=text)
+			loading_screen_label.pack()
+			loading_frame.update_idletasks()
+
+			try:
+				result = func(*args, **kwargs)
+			except Exception as e:
+				print(e)
+
+				@loading_screen(f'{e}')
+				def error_timer():
+					[(sleep(0.1), root.update()) for x in range(15)]
+				error_timer()
+			else:
+				loading_screen_label.destroy()
+				loading_frame.update_idletasks()
+				return result
+		return inner
+	return decorator
+
 #funcions
 def swap_bits(num:int, bit_index:int, bit_value:int|str) -> int:
 	new_num = list(format(num.to_bytes()[0], '08b'))
@@ -123,40 +152,12 @@ def create_Order3(width:int, hight:int, key:str, colors:int = 4, bits:int = 3)->
 			if not len(y[randY]):
 				y.pop(randY)
 
+@loading_screen('Sorting ...')
 def sort_list(unsorted:list[str], idx:int):
-	
 	key = lambda a:a[idx]
 	unsorted.sort(key=key)
 
 #GUI
-def loading_screen(text:str = 'Please wait...'):
-	def decorator(func):
-		def inner(*args, **kwargs):
-			global loading_screen_label
-			global loading_frame
-			global root
-			try: loading_screen_label.destroy()
-			except: pass
-			loading_screen_label = tk.Label(loading_frame, text=text)
-			loading_screen_label.pack()
-			loading_frame.update_idletasks()
-
-			try:
-				result = func(*args, **kwargs)
-			except Exception as e:
-				print(e)
-
-				@loading_screen(f'{e}')
-				def error_timer():
-					[(sleep(0.1), root.update()) for x in range(15)]
-				error_timer()
-			else:
-				loading_screen_label.destroy()
-				loading_frame.update_idletasks()
-				return result
-		return inner
-	return decorator
-
 class ListEntry:
 	def __init__(self, master, text:list[str] = ['', '', '', ''], make_pass = False):
 		global list_entries
