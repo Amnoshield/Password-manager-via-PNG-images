@@ -123,6 +123,10 @@ def create_Order3(width:int, hight:int, key:str, colors:int = 4, bits:int = 3)->
 			if not len(y[randY]):
 				y.pop(randY)
 
+def sort_list(unsorted:list[str], idx:int, reverse:float=False):
+	key = lambda a:a[idx]
+	unsorted.sort(key=key, reverse=reverse)
+
 #GUI
 def loading_screen(text:str = 'Please wait...'):
 	def decorator(func):
