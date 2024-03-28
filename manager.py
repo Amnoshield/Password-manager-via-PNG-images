@@ -1,5 +1,9 @@
 #By Asa Kramer
 
+"""from os import system
+system('pip install cryptography')
+input('waiting')"""
+
 import base64
 import zlib
 from cryptography.fernet import Fernet
