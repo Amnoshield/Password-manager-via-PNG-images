@@ -55,10 +55,8 @@ except ValueError as e:
 """ add restore / clear functions that only effect the selected bits.
 Make restore function a inbetween. (101 instead of 000 or 111) """
 
-""" use a changed / encrypted password for the random.seed() """
+""" use a changed / encrypted password for the random.seed() and use np.random not random """
 
 """ add password hide button???? """
 
 """ use random.getrandbits(8)???? """
-
-
