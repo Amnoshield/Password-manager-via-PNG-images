@@ -1,4 +1,5 @@
 """ find a way to use the GPU for the image prosessing. """
+
 import numpy as np
 from PIL import Image
 
