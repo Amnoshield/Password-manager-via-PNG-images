@@ -319,7 +319,6 @@ def save_file():
 	global password
 	new = []
 	temp = [x[:-1] for x in get_data()]
-	print(temp)
 	for x in temp:
 		new.append('\t'.join(x))
 	long:str = '\n'.join(new)
