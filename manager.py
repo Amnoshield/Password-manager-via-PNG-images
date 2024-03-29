@@ -16,6 +16,7 @@ import tkinter as tk
 from tkinter import filedialog
 from PIL import Image, ImageTk
 from time import sleep
+from copy import deepcopy
 
 #decorators
 def loading_screen(text:str = 'Please wait...'):
@@ -157,9 +158,14 @@ def create_Order3(width:int, hight:int, key:str, colors:int = 4, bits:int = 3)->
 				y.pop(randY)
 
 @loading_screen('Sorting ...')
-def sort_list(unsorted:list[str], idx:int):
+def sort_list(unsorted:list, idx:int):
+	temp = deepcopy(unsorted)
+
 	key = lambda a:a[idx]
 	unsorted.sort(key=key)
+	
+	if temp == unsorted:
+		unsorted.sort(key=key, reverse=True)
 
 #GUI
 class ListEntry:
@@ -312,7 +318,8 @@ def read_data(key:str):
 def save_file():
 	global password
 	new = []
-	temp = get_data()
+	temp = [x[:-1] for x in get_data()]
+	print(temp)
 	for x in temp:
 		new.append('\t'.join(x))
 	long:str = '\n'.join(new)
@@ -349,6 +356,7 @@ def load_all() -> None:
 		list_entries[0].delete_entry()
 
 	for x in passwords:
+		x=x[:4]
 		list_entries.append(ListEntry(pass_frame, x))
 
 	canvas.config(scrollregion=canvas.bbox("all"))
@@ -380,13 +388,17 @@ def get_data() -> list[list[str]]:
 	global passwords
 	passwords = [[y.get() for y in x.entreis] for x in list_entries]
 
-	return(passwords)
+	strenths = [[float(x.strength.cget("text")[:-1])] for x in list_entries]
+
+	passwords = [x+y for x, y in zip(passwords, strenths)]
+
+	return passwords
 
 def add_pass():
 	global list_entries
 	global pass_frame
 	list_entries.append(ListEntry(pass_frame, make_pass=True))
-	#load_all()
+
 	canvas.config(scrollregion=canvas.bbox('all'))
 	pass_frame.update_idletasks()
 
@@ -470,7 +482,19 @@ def main() -> None:
 	canvas.configure(yscrollcommand=scrollbar.set)
 	pass_frame = tk.Frame(canvas)
 	canvas.create_window((0, 0), window=pass_frame, anchor='nw')
-	
+
+	def _bound_to_mousewheel(event):
+		canvas.bind_all('<MouseWheel>', _on_mousewheel)
+
+	def _unbound_to_mousewheel(event):
+		canvas.unbind_all("<MouseWheel>")
+
+	def _on_mousewheel(event):
+		canvas.yview_scroll(int(-1*(event.delta/120)), "units")
+
+	pass_frame.bind('<Enter>', _bound_to_mousewheel)
+	pass_frame.bind('<Leave>', _unbound_to_mousewheel)
+
 	get_pass_frame = tk.Frame(root)
 
 	new = tk.Button(root, text='+', command=add_pass)
@@ -484,8 +508,8 @@ def main() -> None:
 	get_pass_frame.pack()
 	loading_frame.pack()
 	details_frame.pack()
-	new.pack(side=tk.BOTTOM)
-	canvas.pack(side=tk.BOTTOM, fill='y', expand=True, ipadx=100, padx=50)
+	canvas.pack(fill='y', expand=True, ipadx=100, padx=50)
+	new.pack()
 
 	load_all()
 
