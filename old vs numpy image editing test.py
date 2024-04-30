@@ -162,6 +162,7 @@ def func_to_use_cached(value):
 #C:\Users\CST\Desktop\Cathode_surface_2.png
 image = Image.open(input('Please enter image path: '))
 image = image.convert('RGBA')
+print(f'Image size: {image.size}')
 
 print("""
 running cached""")
