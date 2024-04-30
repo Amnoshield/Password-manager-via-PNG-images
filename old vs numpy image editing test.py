@@ -6,11 +6,15 @@ from typing import Generator
 import numpy as np
 from PIL import Image
 import secrets
+from functools import lru_cache
 
 def timer(itirations:int = 1, timeLimit:int = None):
 	def decorator(func):
 		def inner(*args, **kwargs):
 			numbers = []
+			print(f"""----------
+Timing function: {func.__name__}
+----------""")
 			for x in range(itirations):
 				if timeLimit and sum(numbers) > timeLimit:
 					break
@@ -20,10 +24,24 @@ def timer(itirations:int = 1, timeLimit:int = None):
 				end = time.time()
 				numbers.append(end-start)
 			
-			print(f'avg sec: {sum(numbers)/len(numbers)}, max: {max(numbers)}, min: {min(numbers)}')
+			print(f"""----------
+Timing done on function: {func.__name__}""")
+
+			avg = sum(numbers)/len(numbers)
+			_max = max(numbers)
+			_min = min(numbers)
+			if avg > 60:
+				avg /= 60
+				_max /= 60
+				_min /= 60
+				print(f'avg min: {avg}, max: {_max}, min: {_min}')
+			else:
+				print(f'avg sec: {avg}, max: {_max}, min: {_min}')
 
 			if len(numbers) != itirations:
 				print(f'Timer ended early with {len(numbers)} tests run instead of {itirations}')
+			
+			print('----------')
 
 			
 			return result
@@ -37,8 +55,15 @@ def swap_bits(num:int, bit_index:int, bit_value:int|str) -> int:
 	new_num[-(bit_index+1)] = str(bit_value)
 	return int(''.join(new_num), 2)
 
+@lru_cache(maxsize=None)
+def swap_bits_cashed(num:int, bit_index:int, bit_value:int|str) -> int:
+	num = int(num)
+	new_num = list(format(num.to_bytes()[0], '08b'))
+	new_num[-(bit_index+1)] = str(bit_value)
+	return int(''.join(new_num), 2)
+
 #numpy func
-#@timer(100, 30)
+@timer(100, 30)
 def numpy_func(image:Image.Image, custom_function):
 	# Get the dimensions of the image
 	width, height = image.size
@@ -49,7 +74,6 @@ def numpy_func(image:Image.Image, custom_function):
 
 	# Modify each random pixel and its color channel using the custom function
 	func = np.vectorize(custom_function)
-	print('starting to run numpy func now')
 	all_rgba_values = func(all_rgba_values)
 
 #my func
@@ -123,6 +147,12 @@ def func_to_use(value):
 	for x in range(4):
 		value = swap_bits(value, x, secrets.randbits(1))
 	return value
+
+@lru_cache(maxsize=None)
+def func_to_use_cached(value):
+	for x in range(4):
+		value = swap_bits_cashed(value, x, secrets.randbits(1))
+	return value
 	
 """ for x in range(255):
 	x+=1
@@ -132,7 +162,14 @@ def func_to_use(value):
 image = Image.open(input('Please enter image path: '))
 image = image.convert('RGBA')
 
-print('starting ')
+print('running uncached')
 mine(image, func_to_use)
-print('------------')
 numpy_func(image, func_to_use)
+
+print("""
+running cached""")
+
+mine(image, func_to_use_cached)
+func_to_use_cached.cache_clear()
+swap_bits_cashed.cache_clear()
+numpy_func(image, func_to_use_cached)
