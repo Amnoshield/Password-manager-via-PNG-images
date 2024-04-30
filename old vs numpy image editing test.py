@@ -55,7 +55,7 @@ def swap_bits(num:int, bit_index:int, bit_value:int|str) -> int:
 	new_num[-(bit_index+1)] = str(bit_value)
 	return int(''.join(new_num), 2)
 
-@lru_cache(maxsize=None)
+@lru_cache()
 def swap_bits_cashed(num:int, bit_index:int, bit_value:int|str) -> int:
 	num = int(num)
 	new_num = list(format(num.to_bytes()[0], '08b'))
@@ -148,7 +148,7 @@ def func_to_use(value):
 		value = swap_bits(value, x, secrets.randbits(1))
 	return value
 
-@lru_cache(maxsize=None)
+@lru_cache()
 def func_to_use_cached(value):
 	for x in range(4):
 		value = swap_bits_cashed(value, x, secrets.randbits(1))
@@ -159,17 +159,21 @@ def func_to_use_cached(value):
 	print(f'{x}:', func_for_numpy(x)) """
 
 #C:\Users\CST\Desktop\testing.png
+#C:\Users\CST\Desktop\Cathode_surface_2.png
 image = Image.open(input('Please enter image path: '))
 image = image.convert('RGBA')
 
-print('running uncached')
-mine(image, func_to_use)
-numpy_func(image, func_to_use)
-
 print("""
 running cached""")
-
 mine(image, func_to_use_cached)
 func_to_use_cached.cache_clear()
 swap_bits_cashed.cache_clear()
 numpy_func(image, func_to_use_cached)
+
+func_to_use_cached.cache_clear()
+swap_bits_cashed.cache_clear()
+print('\n')
+
+print('running uncached')
+mine(image, func_to_use)
+numpy_func(image, func_to_use)
