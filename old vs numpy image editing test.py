@@ -8,6 +8,25 @@ from PIL import Image
 import secrets
 from functools import lru_cache
 
+def make_table():
+	swap_table = dict()
+	for x in range(256):
+		for y in range(8):
+			for z in range(2):
+				swap_table[x,y,z] = swap_bits(x, y, z)
+	return swap_table
+
+""" class swap_bits_table:
+	def __init__(self, path:str = 'bit_swap_table.json'):
+		import json
+		with open(path) as json_file:
+			self.data = json.load(json_file)
+		
+
+	
+	def swap_bits(self, num:int, bit_index:int, bit_value:int) -> int:
+		return self.data[str(num)][str(bit_index)][str(bit_value)] """
+		
 def timer(itirations:int = 1, timeLimit:int = None):
 	def decorator(func):
 		def inner(*args, **kwargs):
@@ -48,14 +67,13 @@ Timing done on function: {func.__name__}""")
 		return inner
 	return decorator
 
-
 def swap_bits(num:int, bit_index:int, bit_value:int|str) -> int:
 	num = int(num)
 	new_num = list(format(num.to_bytes()[0], '08b'))
 	new_num[-(bit_index+1)] = str(bit_value)
 	return int(''.join(new_num), 2)
 
-@lru_cache()
+@lru_cache(maxsize=None)
 def swap_bits_cashed(num:int, bit_index:int, bit_value:int|str) -> int:
 	num = int(num)
 	new_num = list(format(num.to_bytes()[0], '08b'))
@@ -148,12 +166,16 @@ def func_to_use(value):
 		value = swap_bits(value, x, secrets.randbits(1))
 	return value
 
-@lru_cache()
 def func_to_use_cached(value):
 	for x in range(4):
 		value = swap_bits_cashed(value, x, secrets.randbits(1))
 	return value
-	
+
+def func_to_use_table(value):
+	for x in range(4):
+		value = swap_table[value, x, secrets.randbits(1)]
+	return value
+
 """ for x in range(255):
 	x+=1
 	print(f'{x}:', func_for_numpy(x)) """
@@ -164,14 +186,20 @@ image = Image.open(input('Please enter image path: '))
 image = image.convert('RGBA')
 print(f'Image size: {image.size}')
 
-print("""
-running cached""")
+swap_table = make_table()
+print('running table')
+mine(image, func_to_use_table)
+numpy_func(image, func_to_use_table)
+
+print("running cached")
 mine(image, func_to_use_cached)
-func_to_use_cached.cache_clear()
+print('cache info: ', swap_bits_cashed.cache_info())
 swap_bits_cashed.cache_clear()
 numpy_func(image, func_to_use_cached)
 
-func_to_use_cached.cache_clear()
+
+print('cache info: ', swap_bits_cashed.cache_info())
+
 swap_bits_cashed.cache_clear()
 print('\n')
 
