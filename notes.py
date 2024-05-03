@@ -94,4 +94,5 @@ Make restore function in between. (101 instead of 000 or 111) """
 
 """ use random.getrandbits(8)???? """
 
-""" Use menu.post(300, 300) for password and settings popup """
+""" Use menu.post(300, 300) for password and settings popup
+also look into using tkinter.messagebox.askyesno("ashyesno", "Is this an integer?") or something like that"""
