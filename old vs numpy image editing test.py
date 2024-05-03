@@ -80,6 +80,14 @@ def swap_bits_cashed(num:int, bit_index:int, bit_value:int|str) -> int:
 	new_num[-(bit_index+1)] = str(bit_value)
 	return int(''.join(new_num), 2)
 
+def gpt_swap_bits(num: int, bit_index: int, bit_value: int) -> int:
+    mask = 1 << bit_index
+    if bit_value:
+        return num | mask
+    else:
+        return num & ~mask
+
+
 #numpy func
 @timer(100, 30)
 def numpy_func(image:Image.Image, custom_function):
@@ -176,6 +184,12 @@ def func_to_use_table(value):
 		value = swap_table[value, x, secrets.randbits(1)]
 	return value
 
+def func_to_use_gpt(value):
+	for x in range(4):
+		value = gpt_swap_bits(value, x, secrets.randbits(1))
+	return value
+
+
 """ for x in range(255):
 	x+=1
 	print(f'{x}:', func_for_numpy(x)) """
@@ -186,11 +200,18 @@ image = Image.open(input('Please enter image path: '))
 image = image.convert('RGBA')
 print(f'Image size: {image.size}')
 
+
+print('running chat gpt swap bits function')
+mine(image, func_to_use_gpt)
+numpy_func(image, func_to_use_gpt)
+
 swap_table = make_table()
+print()
 print('running table')
 mine(image, func_to_use_table)
 numpy_func(image, func_to_use_table)
 
+print()
 print("running cached")
 mine(image, func_to_use_cached)
 print('cache info: ', swap_bits_cashed.cache_info())
@@ -201,8 +222,8 @@ numpy_func(image, func_to_use_cached)
 print('cache info: ', swap_bits_cashed.cache_info())
 
 swap_bits_cashed.cache_clear()
-print('\n')
 
+print()
 print('running uncached')
 mine(image, func_to_use)
 numpy_func(image, func_to_use)
