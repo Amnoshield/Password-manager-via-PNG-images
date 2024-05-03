@@ -1,4 +1,4 @@
-""" find a way to use the GPU for the image prosessing??? """
+""" find a way to use the GPU for the image processing??? """
 
 import numpy as np
 from PIL import Image

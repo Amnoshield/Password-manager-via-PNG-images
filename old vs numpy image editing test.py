@@ -27,19 +27,19 @@ def make_table():
 	def swap_bits(self, num:int, bit_index:int, bit_value:int) -> int:
 		return self.data[str(num)][str(bit_index)][str(bit_value)] """
 		
-def timer(itirations:int = 1, timeLimit:int = None):
+def timer(iterations:int = 1, timeLimit:int = None):
 	def decorator(func):
 		def inner(*args, **kwargs):
 			numbers = []
 			print(f"""----------
 Timing function: {func.__name__}
 ----------""")
-			for x in range(itirations):
+			for x in range(iterations):
 				if timeLimit and sum(numbers) > timeLimit:
 					break
 				start = time.time()
 				result = func(*deepcopy(args), **deepcopy(kwargs))
-				print(f'itiration count: {x+1}')
+				print(f'iteration count: {x+1}')
 				end = time.time()
 				numbers.append(end-start)
 			
@@ -57,8 +57,8 @@ Timing done on function: {func.__name__}""")
 			else:
 				print(f'avg sec: {avg}, max: {_max}, min: {_min}')
 
-			if len(numbers) != itirations:
-				print(f'Timer ended early with {len(numbers)} tests run instead of {itirations}')
+			if len(numbers) != iterations:
+				print(f'Timer ended early with {len(numbers)} test(s) run instead of {iterations}')
 			
 			print('----------')
 
