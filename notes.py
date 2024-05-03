@@ -93,3 +93,5 @@ Make restore function in between. (101 instead of 000 or 111) """
 """ add password hide button???? """
 
 """ use random.getrandbits(8)???? """
+
+""" Use menu.post(300, 300) for password and settings popup """
