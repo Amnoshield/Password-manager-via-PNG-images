@@ -86,7 +86,7 @@ except ValueError as e:
 """  add a way to select the number of bits """
 
 """ add restore / clear functions that only effect the selected bits.
-Make restore function a inbetween. (101 instead of 000 or 111) """
+Make restore function in between. (101 instead of 000 or 111) """
 
 """ use a changed / encrypted password for the random.seed() and use np.random not random """
 
