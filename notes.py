@@ -98,3 +98,5 @@ Make restore function in between. (101 instead of 000 or 111) """
 also look into using tkinter.messagebox.askyesno("ashyesno", "Is this an integer?") or something like that"""
 
 """ Use multi-threading in the loading screen decorator with some sort of sleep(0.1) loop to bypass wait time """
+
+""" improve menu: don't show password, make a popup edit / see password menu with the password hidden and not editable until an edit button is shown. """
