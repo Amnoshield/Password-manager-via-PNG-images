@@ -27,7 +27,7 @@ def make_table():
 	def swap_bits(self, num:int, bit_index:int, bit_value:int) -> int:
 		return self.data[str(num)][str(bit_index)][str(bit_value)] """
 		
-def timer(iterations:int = 1, timeLimit:int = None):
+def timer(iterations:int = 1, timeLimit:int = 0):
 	def decorator(func):
 		def inner(*args, **kwargs):
 			numbers = []

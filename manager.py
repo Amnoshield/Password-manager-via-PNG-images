@@ -47,11 +47,13 @@ def loading_screen(text:str = 'Please wait...'):
 		return inner
 	return decorator
 
-#funcions
-def swap_bits(num:int, bit_index:int, bit_value:int|str) -> int:
-	new_num = list(format(num.to_bytes()[0], '08b'))
-	new_num[-(bit_index+1)] = str(bit_value)
-	return int(''.join(new_num), 2)
+#functions
+def swap_bits(num: int, bit_index: int, bit_value: int) -> int:
+    mask = 1 << bit_index
+    if bit_value:
+        return num | mask
+    else:
+        return num & ~mask
 
 def to_binary(num:int, num_bits) -> str:
 	return format(num.to_bytes()[0], f'0{num_bits+1}b')
@@ -179,20 +181,20 @@ class ListEntry:
 
 		row_pos = 0
 
-		self.entreis:list[tk.Entry] = []
+		self.entries:list[tk.Entry] = []
 		for idx, x in enumerate(text):
 			temp = tk.StringVar()
 			temp.set(x)
-			self.entreis.append(tk.Entry(self.frame, width=20, textvariable=temp))
-			self.entreis[-1].grid(row = row_pos, column=idx)
+			self.entries.append(tk.Entry(self.frame, width=20, textvariable=temp))
+			self.entries[-1].grid(row = row_pos, column=idx)
 
 		self.strength = tk.Label(self.frame)
-		self.strength.grid(row=row_pos, column=len(self.entreis))
-		self.entreis[1].bind(sequence='<KeyRelease>', func=lambda a:self.check_pass_strength())
+		self.strength.grid(row=row_pos, column=len(self.entries))
+		self.entries[1].bind(sequence='<KeyRelease>', func=lambda a:self.check_pass_strength())
 		self.check_pass_strength()
 
 		self.delete_button = tk.Button(self.frame, text="-", command=self.delete_entry)
-		self.delete_button.grid(row=row_pos, column=2+len(self.entreis), padx=5, pady=5)
+		self.delete_button.grid(row=row_pos, column=2+len(self.entries), padx=5, pady=5)
 
 		if not list_entries:
 			self.top()
@@ -208,7 +210,7 @@ class ListEntry:
 			list_entries[0].top()
 
 	def check_pass_strength(self):
-		self.strength.config(text=f'{check_password_strength(self.entreis[1].get()):.1f}%')
+		self.strength.config(text=f'{check_password_strength(self.entries[1].get()):.1f}%')
 		self.frame.update_idletasks()
 
 	def top(self):
@@ -224,7 +226,7 @@ class ListEntry:
 		self.b_username.grid(row=0, column=3)
 		self.b_strenth.grid(row=0, column=4)
 
-		for x in self.entreis:
+		for x in self.entries:
 			x.grid(row = 1)
 
 		self.delete_button.grid(row=1)
@@ -283,7 +285,7 @@ def save_data(data:str, key:str):
 	for bit in data:
 		x, y, z, w = next(order)
 		color = list(pixel_data[x, y])
-		color[z] = swap_bits(color[z], w, bit)
+		color[z] = swap_bits(color[z], w, int(bit))
 		color[z] = swap_bits(color[z], num_of_bits, 0)
 
 		pixel_data[x, y] = tuple(color)
@@ -387,9 +389,9 @@ def get_data() -> list[list[str]]:
 	global passwords
 	passwords = [[y.get() for y in x.entreis] for x in list_entries]
 
-	strenths = [[float(x.strength.cget("text")[:-1])] for x in list_entries]
+	strengths = [[float(x.strength.cget("text")[:-1])] for x in list_entries]
 
-	passwords = [x+y for x, y in zip(passwords, strenths)]
+	passwords = [x+y for x, y in zip(passwords, strengths)]
 
 	return passwords
 
@@ -443,13 +445,13 @@ def main() -> None:
 
 	# Create the main window
 	width = 800
-	hieght = 500
+	height = 500
 	root = tk.Tk()
 	root.title("Password manager")
-	root.geometry(f"{width}x{hieght}")
+	root.geometry(f"{width}x{height}")
 	root.pack_propagate(False)
 
-	#detils
+	#details
 	details_frame = tk.Frame(root)
 	
 	#Toplevel
