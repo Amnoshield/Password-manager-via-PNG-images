@@ -17,6 +17,7 @@ from tkinter import filedialog
 from PIL import Image, ImageTk
 from time import sleep
 from copy import deepcopy
+from tkinter import simpledialog
 
 #decorators
 def loading_screen(text:str = 'Please wait...'):
@@ -266,8 +267,14 @@ def select_file():
 
 	if temp:
 		file_path = temp
-		image = Image.open(file_path)
+		image: Image.Image = Image.open(file_path)
+
+		if image.mode != 'RGBA':
+			image = image.convert('RGBA')
+			image.save(file_path)
+
 		image = image.resize((100, 100))
+		
 		tk_image = ImageTk.PhotoImage(image)
 		file_details.config(text=file_path.split('/')[-1])
 		file_image.config(text=file_path.split('/')[-1], image=tk_image)
@@ -363,7 +370,7 @@ def load_all() -> None:
 	canvas.config(scrollregion=canvas.bbox("all"))
 	pass_frame.update_idletasks()
 
-def finish_pass(text:tk.Entry, root):
+""" def finish_pass(text:tk.Entry, root):
 	global password
 	password = text.get()
 	root.destroy()
@@ -382,12 +389,17 @@ def ask_for_pass(root) -> None:
 
 	label.pack(fill=tk.BOTH)
 	password_box.pack()
-	done.pack()
+	done.pack() """
+
+def ask_for_pass():
+	global password
+	global root
+	password = simpledialog.askstring(title="key", prompt="Please enter key:", parent=root)
 
 def get_data() -> list[list[str]]:
 	global list_entries
 	global passwords
-	passwords = [[y.get() for y in x.entreis] for x in list_entries]
+	passwords = [[y.get() for y in x.entries] for x in list_entries]
 
 	strengths = [[float(x.strength.cget("text")[:-1])] for x in list_entries]
 
@@ -408,7 +420,7 @@ def gen_password():
 		password = ''.join(random.choices(k=16, population='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890!@#$%^&*()-_=+[{]};:\'",<.>/?\\|`~'))
 		if check_password_strength(password) == 100: return password
 
-def wipe_file():
+""" def wipe_file():
 	global file_path
 	global num_of_bits
 
@@ -418,10 +430,34 @@ def wipe_file():
 	
 	for x in range(width):
 		for y in range(hight):
-			pixel_data[x, y] = int(('0'*num_of_bits + to_binary(pixel_data[x, y], num_of_bits)[::-1][:num_of_bits])[::-1], 2)
-
+			pixel_data[x, y] = int(('0'*num_of_bits + to_binary(pixel_data[x, y], num_of_bits)[::-1][:num_of_bits])[::-1], 2) """
+ 
+@loading_screen()
 def add_noise():
-	pass
+	global file_path
+	global num_of_bits
+	global root
+
+
+	percent = simpledialog.askinteger(title='percent', prompt='Please enter a percent of bits to be ones:', initialvalue=50, minvalue=0, maxvalue=100, parent=root)/100
+
+	image = Image.open(file_path)
+	pixel_data = image.load()
+	width, hight = image.size
+
+	random.seed()
+	
+	for x in range(width):
+		for y in range(hight):
+			for z in range(num_of_bits):
+				pixel_data[x, y] = (
+					swap_bits(pixel_data[x, y][0], z, random.random()<percent),
+					swap_bits(pixel_data[x, y][1], z, random.random()<percent),
+					swap_bits(pixel_data[x, y][2], z, random.random()<percent),
+					swap_bits(pixel_data[x, y][3], z, random.random()<percent)
+						)
+	
+	image.save(file_path)
 
 def main() -> None:
 	global list_entries
@@ -437,6 +473,7 @@ def main() -> None:
 	global loading_frame
 	global loading_screen_label
 	global root
+
 	num_of_bits = 3
 	password = ''
 	list_entries = []
@@ -459,7 +496,7 @@ def main() -> None:
 	load = tk.Button(details_frame, text='Load', command=load_file)
 	file_image = tk.Label(details_frame)
 	file_details = tk.Label(details_frame, text='No file selected')
-	set_pass = tk.Button(details_frame, text='Set key', command=lambda:ask_for_pass(get_pass_frame))
+	set_pass = tk.Button(details_frame, text='Set key', command=ask_for_pass)
 	file_details.grid(row=1, column=2, pady= 10)
 	load.grid(row=1, column=1, pady= 10)
 	set_pass.grid(row=1, column=3, pady= 10)
@@ -471,6 +508,7 @@ def main() -> None:
 	filemenu = tk.Menu(menu)
 	menu.add_cascade(label='File', menu=filemenu)
 	filemenu.add_command(label='Save...', command=save_file)
+	filemenu.add_command(label='Clear', command=add_noise)
 	filemenu.add_separator()
 	filemenu.add_command()
 	filemenu.add_separator()

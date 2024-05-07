@@ -12,7 +12,9 @@ Make restore function in between. (101 instead of 000 or 111) """
 """ use random.getrandbits(8)???? """
 
 """ Use menu.post(300, 300) for password and settings popup
-also look into using tkinter.messagebox.askyesno("ashyesno", "Is this an integer?") or something like that"""
+also look into using tkinter.messagebox.askyesno("ashyesno", "Is this an integer?") or something like that
+maybe this: simpledialog.askstring(title="Test", prompt="What's your Name?:")
+"""
 
 """ Use multi-threading in the loading screen decorator with some sort of sleep(0.1) loop to bypass wait time """
 
