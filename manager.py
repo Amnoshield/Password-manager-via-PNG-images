@@ -14,10 +14,10 @@ from typing import Generator
 import random
 import tkinter as tk
 from tkinter import filedialog
+from tkinter import simpledialog
 from PIL import Image, ImageTk
 from time import sleep
 from copy import deepcopy
-from tkinter import simpledialog
 import threading
 
 #decorators
@@ -67,13 +67,13 @@ def swap_bits(num: int, bit_index: int, bit_value: int) -> int:
 def to_binary(num:int, num_bits) -> str:
 	return format(num.to_bytes()[0], f'0{num_bits+1}b')
 
-def make_key(key:str) -> bytes:
+def make_key(key:str, saltx:str = '', iterations:int = 0) -> bytes:
 	input_bytes: bytes = key.encode('utf-8')
 	kdf = PBKDF2HMAC(
 		algorithm=hashes.SHA256(),
 		length=32,
-		salt=f'salt{key}'.encode(),  # You should use a different salt value for each password
-		iterations=100000,  # Adjust the number of iterations as needed
+		salt=f'salt{key}{saltx}'.encode(),  # You should use a different salt value for each password
+		iterations=100000+iterations,  # Adjust the number of iterations as needed
 		backend=default_backend()
 	)
 	return base64.urlsafe_b64encode(kdf.derive(input_bytes))
@@ -116,7 +116,7 @@ def decompress(data:str) -> bytes:
 	return zlib.decompress(data_bytes)
 
 def create_4d_array4(width:int, hight:int, key:str, colors:int = 4, num_bits = 3) -> Generator[list[list[list[tuple[int, int, int, int]]]], None, None]:
-	random.seed(key)
+	random.seed(make_key(key, 'nerd', 20))
 	xList = list(range(width))
 	random.shuffle(xList)
 	yList = list(range(hight))
@@ -149,7 +149,7 @@ def create_4d_array4(width:int, hight:int, key:str, colors:int = 4, num_bits = 3
 	
 def create_Order3(width:int, hight:int, key:str, colors:int = 4, bits:int = 3)-> Generator[tuple[int, int, int, int], None, None]:
 	array: Generator[list[list[list[tuple[int, int, int, int]]]], None, None] = create_4d_array4(width, hight, key, colors)
-	random.seed(key)
+	random.seed(make_key(key, 'hehe', 7))
 
 	for y in array:
 		random.shuffle(y)
