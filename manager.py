@@ -47,7 +47,7 @@ def loading_screen(text:str = 'Please wait...'):
 
 				@loading_screen(f'{e}')
 				def error_timer():
-					[(sleep(0.1), root.update()) for x in range(15)]
+					sleep(1.5)
 				error_timer()
 			else:
 				loading_screen_label.destroy()
