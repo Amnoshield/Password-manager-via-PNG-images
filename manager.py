@@ -394,7 +394,9 @@ def ask_for_pass(root) -> None:
 def ask_for_pass():
 	global password
 	global root
-	password = simpledialog.askstring(title="key", prompt="Please enter key:", parent=root)
+	user_input: str | None = simpledialog.askstring(title="key", prompt="Please enter key:", parent=root)
+	if isinstance(user_input, str):
+		password: str = user_input
 
 def get_data() -> list[list[str]]:
 	global list_entries
@@ -438,8 +440,11 @@ def add_noise():
 	global num_of_bits
 	global root
 
-
-	percent = simpledialog.askinteger(title='percent', prompt='Please enter a percent of bits to be ones:', initialvalue=50, minvalue=0, maxvalue=100, parent=root)/100
+	percent = simpledialog.askinteger(title='percent', prompt='Please enter a percent of bits to be ones:', initialvalue=50, minvalue=0, maxvalue=100, parent=root)
+	if isinstance(percent, int):
+		percent /= 100
+	else:
+		return
 
 	image = Image.open(file_path)
 	pixel_data = image.load()
