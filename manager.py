@@ -18,6 +18,7 @@ from PIL import Image, ImageTk
 from time import sleep
 from copy import deepcopy
 from tkinter import simpledialog
+import threading
 
 #decorators
 def loading_screen(text:str = 'Please wait...'):
@@ -33,7 +34,14 @@ def loading_screen(text:str = 'Please wait...'):
 			loading_frame.update_idletasks()
 
 			try:
-				result = func(*args, **kwargs)
+				result = []
+				t1 = threading.Thread(target=lambda:result.append(func(*args, **kwargs)), name='t1')
+				t1.start()
+				while t1.is_alive():
+					sleep(0.1)
+					root.update()
+				
+				result = result[0]
 			except Exception as e:
 				print(e)
 
@@ -396,7 +404,7 @@ def ask_for_pass():
 	global root
 	user_input: str | None = simpledialog.askstring(title="key", prompt="Please enter key:", parent=root)
 	if isinstance(user_input, str):
-		password: str = user_input
+		password = user_input
 
 def get_data() -> list[list[str]]:
 	global list_entries
@@ -435,12 +443,12 @@ def gen_password():
 			pixel_data[x, y] = int(('0'*num_of_bits + to_binary(pixel_data[x, y], num_of_bits)[::-1][:num_of_bits])[::-1], 2) """
  
 @loading_screen()
-def add_noise():
+def add_noise(percent):
 	global file_path
 	global num_of_bits
 	global root
 
-	percent = simpledialog.askinteger(title='percent', prompt='Please enter a percent of bits to be ones:', initialvalue=50, minvalue=0, maxvalue=100, parent=root)
+	#percent = simpledialog.askinteger(title='percent', prompt='Please enter a percent of bits to be ones:', initialvalue=50, minvalue=0, maxvalue=100, parent=root)
 	if isinstance(percent, int):
 		percent /= 100
 	else:
@@ -513,7 +521,7 @@ def main() -> None:
 	filemenu = tk.Menu(menu)
 	menu.add_cascade(label='File', menu=filemenu)
 	filemenu.add_command(label='Save...', command=save_file)
-	filemenu.add_command(label='Clear', command=add_noise)
+	filemenu.add_command(label='Clear', command=lambda:add_noise(simpledialog.askinteger(title='percent', prompt='Please enter a percent of bits to be ones:', initialvalue=50, minvalue=0, maxvalue=100, parent=root)))
 	filemenu.add_separator()
 	filemenu.add_command()
 	filemenu.add_separator()
