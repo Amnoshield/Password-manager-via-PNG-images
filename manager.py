@@ -19,6 +19,7 @@ from PIL import Image, ImageTk
 from time import sleep
 from copy import deepcopy
 import threading
+from functools import lru_cache
 
 #decorators
 def loading_screen(text:str = 'Please wait...'):
@@ -57,6 +58,7 @@ def loading_screen(text:str = 'Please wait...'):
 	return decorator
 
 #functions
+@lru_cache(maxsize=None)
 def swap_bits(num: int, bit_index: int, bit_value: int) -> int:
     mask = 1 << bit_index
     if bit_value:
@@ -148,7 +150,7 @@ def create_4d_array4(width:int, hight:int, key:str, colors:int = 4, num_bits = 3
 	#input(f'{counter}, {[width, hight]}, {min([width, hight])}')
 	
 def create_Order3(width:int, hight:int, key:str, colors:int = 4, bits:int = 3)-> Generator[tuple[int, int, int, int], None, None]:
-	array: Generator[list[list[list[tuple[int, int, int, int]]]], None, None] = create_4d_array4(width, hight, key, colors)
+	array: Generator[list[list[list[tuple[int, int, int, int]]]], None, None] = create_4d_array4(width, hight, key, colors, num_bits=bits)
 	random.seed(make_key(key, 'hehe', 7))
 
 	for y in array:
@@ -316,7 +318,6 @@ def read_data(key:str):
 	global file_path
 	global num_of_bits
 
-
 	image = Image.open(file_path)
 	pixel_data = image.load()
 	width, hight = image.size
@@ -430,47 +431,45 @@ def gen_password():
 		password = ''.join(random.choices(k=16, population='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890!@#$%^&*()-_=+[{]};:\'",<.>/?\\|`~'))
 		if check_password_strength(password) == 100: return password
 
-""" def wipe_file():
-	global file_path
-	global num_of_bits
-
-	image = Image.open(file_path)
-	pixel_data = image.load()
-	width, hight = image.size
-	
-	for x in range(width):
-		for y in range(hight):
-			pixel_data[x, y] = int(('0'*num_of_bits + to_binary(pixel_data[x, y], num_of_bits)[::-1][:num_of_bits])[::-1], 2) """
- 
-@loading_screen()
-def add_noise(percent):
+def add_noise():
 	global file_path
 	global num_of_bits
 	global root
 
-	#percent = simpledialog.askinteger(title='percent', prompt='Please enter a percent of bits to be ones:', initialvalue=50, minvalue=0, maxvalue=100, parent=root)
+	percent = simpledialog.askinteger(title='percent', prompt='Please enter a percent of bits to be ones:', initialvalue=50, minvalue=0, maxvalue=100, parent=root)
 	if isinstance(percent, int):
 		percent /= 100
 	else:
 		return
-
-	image = Image.open(file_path)
-	pixel_data = image.load()
-	width, hight = image.size
-
-	random.seed()
 	
-	for x in range(width):
-		for y in range(hight):
-			for z in range(num_of_bits):
-				pixel_data[x, y] = (
-					swap_bits(pixel_data[x, y][0], z, random.random()<percent),
-					swap_bits(pixel_data[x, y][1], z, random.random()<percent),
-					swap_bits(pixel_data[x, y][2], z, random.random()<percent),
-					swap_bits(pixel_data[x, y][3], z, random.random()<percent)
-						)
-	
-	image.save(file_path)
+	@loading_screen('Adding noise now')
+	def inner():
+		image = Image.open(file_path)
+		pixel_data = image.load()
+		width, hight = image.size
+
+		random.seed()
+		
+		for x in range(width):
+			for y in range(hight):
+				for z in range(num_of_bits):
+					pixel_data[x, y] = (
+						swap_bits(pixel_data[x, y][0], z, random.random()<percent),
+						swap_bits(pixel_data[x, y][1], z, random.random()<percent),
+						swap_bits(pixel_data[x, y][2], z, random.random()<percent),
+						swap_bits(pixel_data[x, y][3], z, random.random()<percent)
+							)
+		
+		image.save(file_path)
+
+	inner()
+
+def change_bits():
+	global num_of_bits
+	temp = simpledialog.askinteger(title='bits', prompt='Please enter a number of bits to be affected:', initialvalue=num_of_bits, minvalue=1, maxvalue=7, parent=root)
+	if isinstance(temp, int):
+		num_of_bits = temp
+		print('Changed bits to', num_of_bits)
 
 def main() -> None:
 	global list_entries
@@ -521,9 +520,8 @@ def main() -> None:
 	filemenu = tk.Menu(menu)
 	menu.add_cascade(label='File', menu=filemenu)
 	filemenu.add_command(label='Save...', command=save_file)
-	filemenu.add_command(label='Clear', command=lambda:add_noise(simpledialog.askinteger(title='percent', prompt='Please enter a percent of bits to be ones:', initialvalue=50, minvalue=0, maxvalue=100, parent=root)))
-	filemenu.add_separator()
-	filemenu.add_command()
+	filemenu.add_command(label='Clear', command=add_noise)
+	filemenu.add_command(label='Change bits', command=change_bits)
 	filemenu.add_separator()
 	filemenu.add_command(label='Open...', command=select_file)
 
@@ -566,5 +564,7 @@ def main() -> None:
 	load_all()
 
 	root.mainloop()
+
+	swap_bits.cache_clear()	
 
 if __name__ == '__main__': main()
