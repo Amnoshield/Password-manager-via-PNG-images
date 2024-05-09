@@ -5,6 +5,7 @@ system('pip install cryptography')
 input('waiting')"""
 
 import base64
+from pprint import pprint
 import zlib
 from cryptography.fernet import Fernet
 from cryptography.hazmat.backends import default_backend
@@ -20,6 +21,7 @@ from time import sleep
 from copy import deepcopy
 import threading
 from functools import lru_cache
+import json
 
 #decorators
 def loading_screen(text:str = 'Please wait...'):
@@ -180,6 +182,11 @@ def sort_list(unsorted:list, idx:int):
 	if temp == unsorted:
 		unsorted.sort(key=key, reverse=True)
 
+def change_setting(setting:str, value):
+	settings = json.load(open('setting.json', 'r'))
+	settings[setting] = value
+	json.dump(settings, open('setting.json', 'w'))
+
 #GUI
 class ListEntry:
 	def __init__(self, master, text:list[str] = ['', '', '', ''], make_pass = False):
@@ -265,18 +272,19 @@ def check_password_strength(password:str) -> float:
    
    return percentage
 
-@loading_screen('Please Select file')
-def select_file():
+def select_file(path = None):
 	global file_path
 	global file_image
 	global details_frame
 	global tk_image
 	global file_details
 
-	temp = filedialog.askopenfilename(filetypes=[("PNG files", "*.png")])
+	if path == None:
+		path = filedialog.askopenfilename(filetypes=[("PNG files", "*.png")])
 
-	if temp:
-		file_path = temp
+	if path:
+		file_path = path
+		change_setting('image_path', path)
 		image: Image.Image = Image.open(file_path)
 
 		if image.mode != 'RGBA':
@@ -469,6 +477,7 @@ def change_bits():
 	temp = simpledialog.askinteger(title='bits', prompt='Please enter a number of bits to be affected:', initialvalue=num_of_bits, minvalue=1, maxvalue=7, parent=root)
 	if isinstance(temp, int):
 		num_of_bits = temp
+		change_setting('bits', num_of_bits)
 		print('Changed bits to', num_of_bits)
 
 def main() -> None:
@@ -486,7 +495,9 @@ def main() -> None:
 	global loading_screen_label
 	global root
 
-	num_of_bits = 3
+	settings = json.load(open('setting.json', 'r'))
+
+	num_of_bits = settings['bits']
 	password = ''
 	list_entries = []
 	new_passwords = []
@@ -562,6 +573,8 @@ def main() -> None:
 	new.pack()
 
 	load_all()
+
+	select_file(settings['image_path'])
 
 	root.mainloop()
 
