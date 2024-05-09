@@ -11,7 +11,7 @@ from cryptography.fernet import Fernet
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
-from typing import Generator
+from typing import Generator, Literal
 import random
 import tkinter as tk
 from tkinter import filedialog
@@ -38,7 +38,11 @@ def loading_screen(text:str = 'Please wait...'):
 
 			try:
 				result = []
-				t1 = threading.Thread(target=lambda:result.append(func(*args, **kwargs)), name='t1')
+				def run_func():
+					try: result.append(func(*args, **kwargs))
+					except: pass
+				
+				t1 = threading.Thread(target=run_func, name='t1')
 				t1.start()
 				while t1.is_alive():
 					sleep(0.1)
@@ -182,10 +186,15 @@ def sort_list(unsorted:list, idx:int):
 	if temp == unsorted:
 		unsorted.sort(key=key, reverse=True)
 
-def change_setting(setting:str, value):
+def change_setting(setting:Literal['bits', 'image_path'], value):
 	settings = json.load(open('setting.json', 'r'))
 	settings[setting] = value
 	json.dump(settings, open('setting.json', 'w'))
+
+def read_setting(setting:Literal['bits', 'image_path']):
+	settings = json.load(open('setting.json', 'r'))
+	
+	return settings[setting]
 
 #GUI
 class ListEntry:
@@ -480,6 +489,15 @@ def change_bits():
 		change_setting('bits', num_of_bits)
 		print('Changed bits to', num_of_bits)
 
+def temp():
+	global loading_frame
+	temp1 = tk.Frame(root, takefocus=1)
+	temp1.place(in_=loading_frame, anchor='center')
+	for y in range(5):
+		for x in range(5):
+			label = tk.Label(temp1, text=f'{(x, y)}')
+			label.grid(column=x, row=y)
+
 def main() -> None:
 	global list_entries
 	global pass_frame
@@ -495,9 +513,7 @@ def main() -> None:
 	global loading_screen_label
 	global root
 
-	settings = json.load(open('setting.json', 'r'))
-
-	num_of_bits = settings['bits']
+	num_of_bits = read_setting('bits')
 	password = ''
 	list_entries = []
 	new_passwords = []
@@ -533,6 +549,7 @@ def main() -> None:
 	filemenu.add_command(label='Save...', command=save_file)
 	filemenu.add_command(label='Clear', command=add_noise)
 	filemenu.add_command(label='Change bits', command=change_bits)
+	filemenu.add_command(label='????', command=temp)
 	filemenu.add_separator()
 	filemenu.add_command(label='Open...', command=select_file)
 
@@ -574,7 +591,7 @@ def main() -> None:
 
 	load_all()
 
-	select_file(settings['image_path'])
+	select_file(read_setting('image_path'))
 
 	root.mainloop()
 
