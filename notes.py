@@ -1,10 +1,5 @@
 """ find a way to use the GPU for the image processing??? I DO NOT THINK THIS IS A GOOD IDEA. use caching instead with the new updated swap pixels function"""
 
-"""  add a way to select the number of bits """
-
-""" add restore / clear functions that only effect the selected bits.
-Make restore function in between. (101 instead of 000 or 111) """
-
 """ use a changed / encrypted password for the random.seed() and use np.random not random """
 
 """ add password hide button???? """
