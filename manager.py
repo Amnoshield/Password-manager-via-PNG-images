@@ -22,7 +22,7 @@ from copy import deepcopy
 import threading
 from functools import lru_cache
 import json
-from tkinter import messagebox
+import pyperclip as pc
 
 #decorators
 def loading_screen(text:str = 'Please wait...'):
@@ -482,11 +482,33 @@ def temp():
 
 def export():
 	global root
+	data = save_data()
 	win = tk.Toplevel(master=root)
 	win.title('Export')
-	tk.Button(win, text='Copy', command=win.destroy).pack()
-	message = ""
-	tk.Label(win, text=message).pack()
+	width = 200
+	height = 150
+	win.geometry(f"{width}x{height}")
+	tk.Button(win, text='Copy data', command=lambda:pc.copy(data)).pack()
+	text = tk.Text(win, height=5)
+	text.insert(tk.END, data)
+	text.config(state='disabled')
+	text.pack(fill='both')
+	tk.Button(win, text='Close', command=win.destroy).pack()
+
+def filter_data(data:str):
+	return ''.join(filter(lambda a:a in '01', data))
+
+def import_data():
+	global root
+	win = tk.Toplevel(master=root)
+	win.title('Export')
+	width = 200
+	height = 150
+	win.geometry(f"{width}x{height}")
+	tk.Button(win, text='Past data', command=lambda:text.insert(tk.END, pc.paste())).pack()
+	text = tk.Text(win, height=5)
+	text.pack(fill='both')
+	tk.Button(win, text='Close', command=lambda:(print(filter_data(text.get("1.0", "end-1c"))), win.destroy())).pack()
 
 def main() -> None:
 	global list_entries
@@ -540,6 +562,7 @@ def main() -> None:
 	filemenu.add_command(label='Clear', command=add_noise)
 	filemenu.add_command(label='Change bits', command=change_bits)
 	filemenu.add_command(label='Export', command=export)
+	filemenu.add_command(label='Import', command=import_data)
 	filemenu.add_command(label='In testing', command=temp)
 	filemenu.add_separator()
 	filemenu.add_command(label='Open...', command=select_file)
