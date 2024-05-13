@@ -481,7 +481,12 @@ def temp():
 			label.grid(column=x, row=y)
 
 def export():
-	messagebox.showinfo('just testing', 'is it working???')
+	global root
+	win = tk.Toplevel(master=root)
+	win.title('Export')
+	tk.Button(win, text='Copy', command=win.destroy).pack()
+	message = ""
+	tk.Label(win, text=message).pack()
 
 def main() -> None:
 	global list_entries
