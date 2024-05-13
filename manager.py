@@ -22,6 +22,7 @@ from copy import deepcopy
 import threading
 from functools import lru_cache
 import json
+from tkinter import messagebox
 
 #decorators
 def loading_screen(text:str = 'Please wait...'):
@@ -245,13 +246,13 @@ class ListEntry:
 		self.b_password = tk.Button(self.frame, text='Password', command=lambda:(sort_list(get_data(), 1), load_all()))
 		self.b_email = tk.Button(self.frame, text='Email', command=lambda:(sort_list(get_data(), 2), load_all()))
 		self.b_username = tk.Button(self.frame, text='Username', command=lambda:(sort_list(get_data(), 3), load_all()))
-		self.b_strenth = tk.Button(self.frame, text='Strenth', command=lambda:(sort_list(get_data(), 4), load_all()))
+		self.b_strength = tk.Button(self.frame, text='Strength', command=lambda:(sort_list(get_data(), 4), load_all()))
 		
 		self.b_name.grid(row=0, column=0)
 		self.b_password.grid(row=0, column=1)
 		self.b_email.grid(row=0, column=2)
 		self.b_username.grid(row=0, column=3)
-		self.b_strenth.grid(row=0, column=4)
+		self.b_strength.grid(row=0, column=4)
 
 		for x in self.entries:
 			x.grid(row = 1)
@@ -307,14 +308,44 @@ def select_file(path = None):
 		file_image.config(text=file_path.split('/')[-1], image=tk_image)
 		details_frame.update_idletasks()
 
-def save_data(data:str, key:str):
+def save_data():
+	global password
+	new = []
+	for x in [x[:-1] for x in get_data()]:
+		new.append('\t'.join(x))
+	long:str = '\n'.join(new)
+
+	data = encrypt(long, key=password)
+
+	return data
+	
+def read_data(data:str):
+	global password
+	global passwords
+
+	new = []
+	for x in decrypt(data, password).split('\n'):
+		new.append(x.split('\t'))
+	
+	if len(new[0]) == 4:
+		passwords = new
+	else:
+		passwords = []
+	
+	load_all()
+
+@loading_screen('Saving...')
+def save_file():
 	global file_path
 	global num_of_bits
+
+	data = save_data()
+	
 	image = Image.open(file_path)
 	pixel_data = image.load()
 
 	width, hight = image.size
-	order = create_Order3(width, hight, key, bits=num_of_bits)
+	order = create_Order3(width, hight, password, bits=num_of_bits)
 
 	for bit in data:
 		x, y, z, w = next(order)
@@ -331,14 +362,18 @@ def save_data(data:str, key:str):
 
 	image.save(file_path)
 
-def read_data(key:str):
+	print('saved')
+
+@loading_screen('Loading...')
+def load_file():
 	global file_path
 	global num_of_bits
+	global password
 
 	image = Image.open(file_path)
 	pixel_data = image.load()
 	width, hight = image.size
-	order = create_Order3(width, hight, key, bits=num_of_bits)
+	order = create_Order3(width, hight, password, bits=num_of_bits)
 
 	data = ''
 	while True:
@@ -346,40 +381,8 @@ def read_data(key:str):
 		#print(to_binary(pixel_data[x, y][z], num_of_bits)[::-1])
 		if to_binary(pixel_data[x, y][z], num_of_bits)[::-1][num_of_bits] == '1': break
 		data += to_binary(pixel_data[x, y][z], num_of_bits)[::-1][w]
-
-	return data
-
-@loading_screen('Saving...')
-def save_file():
-	global password
-	new = []
-	temp = [x[:-1] for x in get_data()]
-	for x in temp:
-		new.append('\t'.join(x))
-	long:str = '\n'.join(new)
-
-	data = encrypt(long, key=password)
-	save_data(data, key=password)
-
-	print('saved')
-
-@loading_screen('Loading...')
-def load_file():
-	global password
-	global passwords
-
-	binary = read_data(password)
-
-	new = []
-	temp = decrypt(binary, password).split('\n')
-	for x in temp:
-		new.append(x.split('\t'))
 	
-	if len(new[0]) == 4:
-		passwords = new
-	else:
-		passwords = []
-	load_all()
+	read_data(data)
 
 def load_all() -> None:
 	global list_entries
@@ -395,27 +398,6 @@ def load_all() -> None:
 
 	canvas.config(scrollregion=canvas.bbox("all"))
 	pass_frame.update_idletasks()
-
-""" def finish_pass(text:tk.Entry, root):
-	global password
-	password = text.get()
-	root.destroy()
-
-@loading_screen('Please enter password')
-def ask_for_pass(root) -> None:
-	top= tk.Toplevel(root)
-	top.geometry("750x250")
-	top.title("Enter Password")
-
-	label = tk.Label(top, text="Please enter password:")
-
-	password_box = tk.Entry(top)
-	
-	done = tk.Button(top, text='Done', command=lambda:finish_pass(password_box, top))
-
-	label.pack(fill=tk.BOTH)
-	password_box.pack()
-	done.pack() """
 
 def ask_for_pass():
 	global password
@@ -498,6 +480,9 @@ def temp():
 			label = tk.Label(temp1, text=f'{(x, y)}')
 			label.grid(column=x, row=y)
 
+def export():
+	messagebox.showinfo('just testing', 'is it working???')
+
 def main() -> None:
 	global list_entries
 	global pass_frame
@@ -549,7 +534,8 @@ def main() -> None:
 	filemenu.add_command(label='Save...', command=save_file)
 	filemenu.add_command(label='Clear', command=add_noise)
 	filemenu.add_command(label='Change bits', command=change_bits)
-	filemenu.add_command(label='????', command=temp)
+	filemenu.add_command(label='Export', command=export)
+	filemenu.add_command(label='In testing', command=temp)
 	filemenu.add_separator()
 	filemenu.add_command(label='Open...', command=select_file)
 
