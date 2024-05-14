@@ -562,8 +562,6 @@ def main() -> None:
 	#details
 	details_frame = tk.Frame(root)
 	
-	#Toplevel
-	
 	load = tk.Button(details_frame, text='Load', command=load_file)
 	file_image = tk.Label(details_frame)
 	file_details = tk.Label(details_frame, text='No file selected')
@@ -573,7 +571,7 @@ def main() -> None:
 	set_pass.grid(row=1, column=3, pady= 10)
 	file_image.grid(row=0, column=2)
 
-	#top bar
+	#Menus
 	menu = tk.Menu(root)
 	root.config(menu=menu)
 
