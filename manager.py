@@ -76,12 +76,12 @@ def swap_bits(num: int, bit_index: int, bit_value: int) -> int:
 def to_binary(num:int, num_bits) -> str:
 	return format(num.to_bytes()[0], f'0{num_bits+1}b')
 
-def make_key(key:str, saltx:str = '', iterations:int = 0) -> bytes:
+def make_key(key:str, salt_:str = '', iterations:int = 0) -> bytes:
 	input_bytes: bytes = key.encode('utf-8')
 	kdf = PBKDF2HMAC(
 		algorithm=hashes.SHA256(),
 		length=32,
-		salt=f'salt{key}{saltx}'.encode(),  # You should use a different salt value for each password
+		salt=f'salt{key}{salt_}'.encode(),  # You should use a different salt value for each password
 		iterations=100000+iterations,  # Adjust the number of iterations as needed
 		backend=default_backend()
 	)
