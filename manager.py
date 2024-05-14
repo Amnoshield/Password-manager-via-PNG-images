@@ -500,21 +500,38 @@ def filter_data(data:str):
 
 def import_data():
 	global root
+
+	def paste():
+		text.insert(tk.END, filter_data(pc.paste()))
+
+	def import_submit():
+		@loading_screen('Unable to import. Please try again')
+		def no_load():
+			sleep(1.5)
+		
+		try:
+			read_data(filter_data(text.get("1.0", "end-1c")))
+			win.destroy()
+		except Exception as e:
+			print(e)
+			win.destroy()
+			no_load()
+
 	win = tk.Toplevel(master=root)
 	win.title('Import')
 	width = 350
 	height = 180
 	win.geometry(f"{width}x{height}")
 	tk.Label(win, text='After pasting and saving data make sure to delete any copy').pack()
-	tk.Button(win, text='Past data', command=lambda:text.insert(tk.END,
-																filter_data(pc.paste())
-																)).pack()
+	
+	tk.Button(win, text='Past data', command=paste).pack()
 	text = tk.Text(win, height=5)
-	text.pack(fill='both')
-	def close():
-		read_data(filter_data(text.get("1.0", "end-1c")))
-		win.destroy()
-	tk.Button(win, text='Close', command=close).pack()
+	text.pack(fill='both', pady=5)
+	
+	submit = tk.Frame(win)
+	submit.pack()
+	tk.Button(submit, text='Import', command=import_submit).grid(row=0, column=0, padx=5)
+	tk.Button(submit, text='Close', command=win.destroy).grid(row=0, column=1, padx=5)
 
 def main() -> None:
 	global list_entries
