@@ -470,15 +470,6 @@ def change_bits():
 		change_setting('bits', num_of_bits)
 		print('Changed bits to', num_of_bits)
 
-def temp():
-	global loading_frame
-	temp1 = tk.Frame(root, takefocus=1)
-	temp1.place(in_=loading_frame, anchor='center')
-	for y in range(5):
-		for x in range(5):
-			label = tk.Label(temp1, text=f'{(x, y)}')
-			label.grid(column=x, row=y)
-
 def filter_data(data:str):
 	return ''.join(filter(lambda a:a in '01', data))
 
@@ -487,14 +478,17 @@ def export():
 	data = save_data(password_='')
 	win = tk.Toplevel(master=root)
 	win.title('Export')
-	width = 250
-	height = 150
+	width = 280
+	height = 180
 	win.geometry(f"{width}x{height}")
-	tk.Button(win, text='Copy data', command=lambda:pc.copy(data)).pack()
+
 	text = tk.Text(win, height=5)
 	text.insert(tk.END, data)
 	text.config(state='disabled')
-	text.pack(fill='both')
+
+	tk.Label(win,text='This exported data is not secure\nand should be deleted after use.').pack()
+	tk.Button(win, text='Copy data', command=lambda:pc.copy(data)).pack()
+	text.pack(fill='x')
 	tk.Button(win, text='Close', command=win.destroy).pack()
 
 def import_data():
@@ -528,7 +522,7 @@ def import_data():
 	
 	tk.Button(win, text='Past data', command=paste).pack()
 	text = tk.Text(win, height=5)
-	text.pack(fill='both', pady=5)
+	text.pack(fill='x', pady=5)
 	
 	submit = tk.Frame(win)
 	submit.pack()
@@ -582,16 +576,21 @@ def main() -> None:
 	#top bar
 	menu = tk.Menu(root)
 	root.config(menu=menu)
+
 	filemenu = tk.Menu(menu)
 	menu.add_cascade(label='File', menu=filemenu)
 	filemenu.add_command(label='Save...', command=save_file)
-	filemenu.add_command(label='Clear', command=add_noise)
-	filemenu.add_command(label='Change bits', command=change_bits)
+	filemenu.add_separator()
 	filemenu.add_command(label='Export', command=export)
 	filemenu.add_command(label='Import', command=import_data)
-	filemenu.add_command(label='In testing', command=temp)
+	filemenu.add_separator()
+	filemenu.add_command(label='Clear', command=add_noise)
 	filemenu.add_separator()
 	filemenu.add_command(label='Open...', command=select_file)
+
+	settings_menu = tk.Menu(menu)
+	menu.add_cascade(label='Settings', menu=settings_menu)
+	settings_menu.add_command(label='Change bits', command=change_bits)
 
 	#canvas
 	canvas = tk.Canvas(root)
