@@ -1,9 +1,5 @@
 #By Asa Kramer
 
-"""from os import system
-system('pip install cryptography')
-input('waiting')"""
-
 import base64
 from pprint import pprint
 import zlib
