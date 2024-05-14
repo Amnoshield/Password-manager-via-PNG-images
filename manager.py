@@ -256,6 +256,11 @@ class ListEntry:
 		self.delete_button.grid(row=1)
 		self.strength.grid(row=1)
 
+	def get_data(self):
+		temp: list = [x.get() for x in self.entries]
+		temp.append(float(self.strength.cget("text")[:-1]))
+		return temp
+		
 def check_password_strength(password:str) -> float:
    # Count the number of uppercase letters, lowercase letters, digits, and special characters
    num_uppercase = sum(1 for char in password if char.isupper())
