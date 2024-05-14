@@ -308,8 +308,10 @@ def select_file(path = None):
 		file_image.config(text=file_path.split('/')[-1], image=tk_image)
 		details_frame.update_idletasks()
 
-def save_data():
-	global password
+def save_data(password_ = None):
+	if not password_: global password
+	else: password = password_
+
 	new = []
 	for x in [x[:-1] for x in get_data()]:
 		new.append('\t'.join(x))
@@ -319,9 +321,10 @@ def save_data():
 
 	return data
 	
-def read_data(data:str):
-	global password
+def read_data(data:str, password_ = None):
 	global passwords
+	if not password_: global password
+	else: password = password_
 
 	new = []
 	for x in decrypt(data, password).split('\n'):
@@ -480,12 +483,15 @@ def temp():
 			label = tk.Label(temp1, text=f'{(x, y)}')
 			label.grid(column=x, row=y)
 
+def filter_data(data:str):
+	return ''.join(filter(lambda a:a in '01', data))
+
 def export():
 	global root
-	data = save_data()
+	data = save_data(password_='')
 	win = tk.Toplevel(master=root)
 	win.title('Export')
-	width = 200
+	width = 250
 	height = 150
 	win.geometry(f"{width}x{height}")
 	tk.Button(win, text='Copy data', command=lambda:pc.copy(data)).pack()
@@ -495,23 +501,23 @@ def export():
 	text.pack(fill='both')
 	tk.Button(win, text='Close', command=win.destroy).pack()
 
-def filter_data(data:str):
-	return ''.join(filter(lambda a:a in '01', data))
-
 def import_data():
 	global root
 
 	def paste():
 		text.insert(tk.END, filter_data(pc.paste()))
 
-	def import_submit():
+	def import_submit(save = True):
 		@loading_screen('Unable to import. Please try again')
 		def no_load():
 			sleep(1.5)
 		
 		try:
-			read_data(filter_data(text.get("1.0", "end-1c")))
+			read_data(filter_data(text.get("1.0", "end-1c")), password_='')
 			win.destroy()
+			if save:
+				save_file()
+			
 		except Exception as e:
 			print(e)
 			win.destroy()
@@ -530,8 +536,9 @@ def import_data():
 	
 	submit = tk.Frame(win)
 	submit.pack()
-	tk.Button(submit, text='Import', command=import_submit).grid(row=0, column=0, padx=5)
-	tk.Button(submit, text='Close', command=win.destroy).grid(row=0, column=1, padx=5)
+	tk.Button(submit, text='Import and save', command=lambda:import_submit(True)).grid(row=0, column=0, padx=5)
+	tk.Button(submit, text='Import', command=lambda:import_submit(False)).grid(row=0, column=1, padx=5)
+	tk.Button(submit, text='Close', command=win.destroy).grid(row=0, column=2, padx=5)
 
 def main() -> None:
 	global list_entries
