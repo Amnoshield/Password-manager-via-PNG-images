@@ -501,14 +501,17 @@ def filter_data(data:str):
 def import_data():
 	global root
 	win = tk.Toplevel(master=root)
-	win.title('Export')
+	win.title('Import')
 	width = 200
 	height = 150
 	win.geometry(f"{width}x{height}")
-	tk.Button(win, text='Past data', command=lambda:text.insert(tk.END, pc.paste())).pack()
+	tk.Button(win, text='Past data', command=lambda:text.insert(tk.END,
+															filter_data(pc.paste())
+															)).pack()
 	text = tk.Text(win, height=5)
 	text.pack(fill='both')
-	tk.Button(win, text='Close', command=lambda:(print(filter_data(text.get("1.0", "end-1c"))), win.destroy())).pack()
+	tk.Button(win, text='Close', command=lambda:(read_data(filter_data(text.get("1.0", "end-1c"))),
+											  win.destroy())).pack()
 
 def main() -> None:
 	global list_entries
