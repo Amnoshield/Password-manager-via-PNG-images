@@ -9,3 +9,12 @@
 """ Improve settings / add more """
 
 """ Add importing and exporting text """
+
+""" 
+make a popup function
+useing
+.grab_set()
+and
+import tkinter as tk
+root = tk.Tk()
+root.geometry("+200+400") # places the window at 200,400 on the screen """
