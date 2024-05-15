@@ -293,20 +293,23 @@ def select_file(path = None):
 		path = filedialog.askopenfilename(filetypes=[("PNG files", "*.png")])
 
 	if path:
-		file_path = path
-		change_setting('image_path', path)
-		image: Image.Image = Image.open(file_path)
+		try:
+			file_path = path
+			change_setting('image_path', path)
+			image: Image.Image = Image.open(file_path)
 
-		if image.mode != 'RGBA':
-			image = image.convert('RGBA')
-			image.save(file_path)
+			if image.mode != 'RGBA':
+				image = image.convert('RGBA')
+				image.save(file_path)
 
-		image = image.resize((100, 100))
-		
-		tk_image = ImageTk.PhotoImage(image)
-		file_details.config(text=file_path.split('/')[-1])
-		file_image.config(text=file_path.split('/')[-1], image=tk_image)
-		details_frame.update_idletasks()
+			image = image.resize((100, 100))
+			
+			tk_image = ImageTk.PhotoImage(image)
+			file_details.config(text=file_path.split('/')[-1])
+			file_image.config(text=file_path.split('/')[-1], image=tk_image)
+			details_frame.update_idletasks()
+		except FileNotFoundError as e:
+			print(e)
 
 def save_data(password_ = None):
 	if not password_: global password
@@ -433,6 +436,25 @@ def gen_password():
 		password = ''.join(random.choices(k=16, population='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890!@#$%^&*()-_=+[{]};:\'",<.>/?\\|`~'))
 		if check_password_strength(password) == 100: return password
 
+def aline_windows(win1:tk.Tk|tk.Toplevel, win2:tk.Tk|tk.Toplevel, wait_for_size = True):
+	"""
+	:win1: The base window that will be below the second.
+	:win2: The window that will be placed on top of the first
+	:wait_for_size: Determines if the program will wait for both windows to not be of size and position: 1x1+0+0
+	"""
+	
+	if wait_for_size:
+		while win1.geometry() == '1x1+0+0' or win2.geometry() == '1x1+0+0':
+			sleep(0.1)
+			root.update()
+
+	wh, x, y = win1.geometry().split('+')
+	x = int(x)
+	y = int(y)
+	w1, h1 = [int(x) for x in wh.split('x')]
+	w2, h2 = [int(x) for x in win2.geometry().split('+')[0].split('x')]
+	win2.geometry(f"+{round(x+(w1/2)-(w2/2))}+{round(y+(h1/2)-(h2/2))}")
+
 #Menu
 def add_noise():
 	global file_path
@@ -479,6 +501,8 @@ def export_binary():
 	height = 180
 	win.geometry(f"{width}x{height}")
 	win.focus()
+	win.grab_set()
+	aline_windows(root, win)
 
 	text = tk.Text(win, height=5)
 	text.insert(tk.END, data)
@@ -517,6 +541,8 @@ def import_binary():
 	height = 180
 	win.geometry(f"{width}x{height}")
 	win.focus()
+	win.grab_set()
+	aline_windows(root, win)
 
 	tk.Label(win, text='After pasting and saving data make sure to delete any copy').pack()
 	
@@ -546,6 +572,8 @@ def change_open_file():
 	height = 130
 	win.geometry(f"{width}x{height}")
 	win.focus()
+	win.grab_set()
+	aline_windows(root, win)
 
 	tk.Label(win,text='Open image on start').pack()
 
@@ -557,8 +585,6 @@ def change_open_file():
 	yes.pack()
 	ask.pack()
 	no.pack()
-
-	print(read_setting('open_image_on_start'))
 
 	tk.Button(win, text='Close', command=win.destroy).pack()
 
