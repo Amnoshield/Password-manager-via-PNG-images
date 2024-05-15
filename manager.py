@@ -185,12 +185,12 @@ def sort_list(unsorted:list, idx:int):
 		unsorted.sort(key=key, reverse=True)
 
 def change_setting(setting:Literal['bits', 'image_path', 'open_image_on_start'], value):
-	settings = json.load(open('setting.json', 'r'))
+	settings = json.load(open('settings.json', 'r'))
 	settings[setting] = value
-	json.dump(settings, open('setting.json', 'w'))
+	json.dump(settings, open('settings.json', 'w'))
 
 def read_setting(setting:Literal['bits', 'image_path', 'open_image_on_start']):
-	return json.load(open('setting.json', 'r'))[setting]
+	return json.load(open('settings.json', 'r'))[setting]
 
 #GUI
 class ListEntry:
@@ -564,6 +564,10 @@ def change_open_file():
 
 	win.mainloop()
 
+def set_default():
+	settings = json.load(open('default_settings.json', 'r'))
+	json.dump(settings, open('settings.json', 'w'))
+
 def main() -> None:
 	global list_entries
 	global pass_frame
@@ -624,14 +628,9 @@ def main() -> None:
 	menu.add_cascade(label='Settings', menu=settings_menu)
 	settings_menu.add_command(label='Change bits', command=change_bits)
 	settings_menu.add_command(label='Startup image', command=change_open_file)
+	settings_menu.add_separator()
+	settings_menu.add_command(label='Reset to default', command=set_default)
 
-	""" open_image = tk.Menu(settings_menu, tearoff=0)
-	settings_menu.add_cascade(label='thingy', menu=thingy)
-	option = tk.StringVar(root, read_setting('open_image_on_start'))
-	open_image.add_checkbutton(label='testing', onvalue='yes', variable=option)
-	open_image.add_radiobutton(label='yes', value='yes', variable=option, command=lambda:change_setting('open_image_on_start', 'yes'))
-	open_image.add_radiobutton(label='ask', value='ask', variable=option, command=lambda:change_setting('open_image_on_start', 'ask'))
-	open_image.add_radiobutton(label='no', value='no', variable=option, command=lambda:change_setting('open_image_on_start', 'no')) """
 
 	#canvas
 	canvas = tk.Canvas(root) 
