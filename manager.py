@@ -103,9 +103,10 @@ def decrypt(text:str, key:str) -> str:
 
 def compress(data:bytes) -> str:
 	""" This compresses bytes into a string of 1's and 0's. """
+	global num_of_bits
 	compressed: bytes = zlib.compress(data, level=9)
 	binary_data: str = ''.join(format(byte, '08b') for byte in compressed)
-	binary_data += '1' + '0'*(-(len(binary_data)+1)%3)
+	binary_data += '1' + '0'*(-(len(binary_data)+1)%num_of_bits)
 	#print(len(binary_data), len(binary_data)%3)
 	return binary_data
 	
@@ -478,7 +479,7 @@ def change_bits():
 def filter_data(data:str):
 	return ''.join(filter(lambda a:a in '01', data))
 
-def export():
+def export_binary():
 	global root
 	data = save_data(password_='')
 	win = tk.Toplevel(master=root)
@@ -496,7 +497,7 @@ def export():
 	text.pack(fill='x')
 	tk.Button(win, text='Close', command=win.destroy).pack()
 
-def import_data():
+def import_binary():
 	global root
 
 	def paste():
@@ -584,8 +585,8 @@ def main() -> None:
 	menu.add_cascade(label='File', menu=filemenu)
 	filemenu.add_command(label='Save...', command=save_file)
 	filemenu.add_separator()
-	filemenu.add_command(label='Export', command=export)
-	filemenu.add_command(label='Import', command=import_data)
+	filemenu.add_command(label='Export', command=export_binary)
+	filemenu.add_command(label='Import', command=import_binary)
 	filemenu.add_separator()
 	filemenu.add_command(label='Clear', command=add_noise)
 	filemenu.add_separator()
