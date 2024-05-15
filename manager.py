@@ -184,15 +184,13 @@ def sort_list(unsorted:list, idx:int):
 	if temp == unsorted:
 		unsorted.sort(key=key, reverse=True)
 
-def change_setting(setting:Literal['bits', 'image_path'], value):
+def change_setting(setting:Literal['bits', 'image_path', 'open_image_on_start'], value):
 	settings = json.load(open('setting.json', 'r'))
 	settings[setting] = value
 	json.dump(settings, open('setting.json', 'w'))
 
-def read_setting(setting:Literal['bits', 'image_path']):
-	settings = json.load(open('setting.json', 'r'))
-	
-	return settings[setting]
+def read_setting(setting:Literal['bits', 'image_path', 'open_image_on_start']):
+	return json.load(open('setting.json', 'r'))[setting]
 
 #GUI
 class ListEntry:
@@ -435,6 +433,7 @@ def gen_password():
 		password = ''.join(random.choices(k=16, population='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890!@#$%^&*()-_=+[{]};:\'",<.>/?\\|`~'))
 		if check_password_strength(password) == 100: return password
 
+#Menu
 def add_noise():
 	global file_path
 	global num_of_bits
@@ -468,14 +467,6 @@ def add_noise():
 
 	inner()
 
-def change_bits():
-	global num_of_bits
-	temp = simpledialog.askinteger(title='bits', prompt='Please enter a number of bits to be affected:', initialvalue=num_of_bits, minvalue=1, maxvalue=7, parent=root)
-	if isinstance(temp, int):
-		num_of_bits = temp
-		change_setting('bits', num_of_bits)
-		print('Changed bits to', num_of_bits)
-
 def filter_data(data:str):
 	return ''.join(filter(lambda a:a in '01', data))
 
@@ -487,6 +478,7 @@ def export_binary():
 	width = 280
 	height = 180
 	win.geometry(f"{width}x{height}")
+	win.focus()
 
 	text = tk.Text(win, height=5)
 	text.insert(tk.END, data)
@@ -524,6 +516,8 @@ def import_binary():
 	width = 350
 	height = 180
 	win.geometry(f"{width}x{height}")
+	win.focus()
+
 	tk.Label(win, text='After pasting and saving data make sure to delete any copy').pack()
 	
 	tk.Button(win, text='Past data', command=paste).pack()
@@ -535,6 +529,40 @@ def import_binary():
 	tk.Button(submit, text='Import and save', command=lambda:import_submit(True)).grid(row=0, column=0, padx=5)
 	tk.Button(submit, text='Import', command=lambda:import_submit(False)).grid(row=0, column=1, padx=5)
 	tk.Button(submit, text='Close', command=win.destroy).grid(row=0, column=2, padx=5)
+
+def change_bits():
+	global num_of_bits
+	temp = simpledialog.askinteger(title='bits', prompt='Please enter a number of bits to be affected:', initialvalue=num_of_bits, minvalue=1, maxvalue=7, parent=root)
+	if isinstance(temp, int):
+		num_of_bits = temp
+		change_setting('bits', num_of_bits)
+		print('Changed bits to', num_of_bits)
+
+def change_open_file():
+	global root
+	win = tk.Toplevel(master=root)
+	win.title('Change open file setting')
+	width = 200
+	height = 130
+	win.geometry(f"{width}x{height}")
+	win.focus()
+
+	tk.Label(win,text='Open image on start').pack()
+
+	thingy = tk.StringVar(win, read_setting('open_image_on_start'))
+	yes = tk.Radiobutton(win, text='yes', value='yes', variable=thingy, command=lambda:change_setting('open_image_on_start', 'yes'))
+	ask = tk.Radiobutton(win, text='ask', value='ask', variable=thingy, command=lambda:change_setting('open_image_on_start', 'ask'))
+	no  = tk.Radiobutton(win, text='no ', value='no', variable=thingy, command=lambda:change_setting('open_image_on_start', 'no'))
+
+	yes.pack()
+	ask.pack()
+	no.pack()
+
+	print(read_setting('open_image_on_start'))
+
+	tk.Button(win, text='Close', command=win.destroy).pack()
+
+	win.mainloop()
 
 def main() -> None:
 	global list_entries
@@ -595,9 +623,18 @@ def main() -> None:
 	settings_menu = tk.Menu(menu)
 	menu.add_cascade(label='Settings', menu=settings_menu)
 	settings_menu.add_command(label='Change bits', command=change_bits)
+	settings_menu.add_command(label='Startup image', command=change_open_file)
+
+	""" open_image = tk.Menu(settings_menu, tearoff=0)
+	settings_menu.add_cascade(label='thingy', menu=thingy)
+	option = tk.StringVar(root, read_setting('open_image_on_start'))
+	open_image.add_checkbutton(label='testing', onvalue='yes', variable=option)
+	open_image.add_radiobutton(label='yes', value='yes', variable=option, command=lambda:change_setting('open_image_on_start', 'yes'))
+	open_image.add_radiobutton(label='ask', value='ask', variable=option, command=lambda:change_setting('open_image_on_start', 'ask'))
+	open_image.add_radiobutton(label='no', value='no', variable=option, command=lambda:change_setting('open_image_on_start', 'no')) """
 
 	#canvas
-	canvas = tk.Canvas(root)
+	canvas = tk.Canvas(root) 
 	scrollbar = tk.Scrollbar(root, orient=tk.VERTICAL, command=canvas.yview)
 	scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
 	canvas.configure(yscrollcommand=scrollbar.set)
@@ -634,7 +671,12 @@ def main() -> None:
 
 	load_all()
 
-	select_file(read_setting('image_path'))
+	option = read_setting('open_image_on_start')
+	if option == 'yes':
+		select_file(read_setting('image_path'))
+	elif option == 'ask':
+		select_file()
+	del option
 
 	root.mainloop()
 
