@@ -194,7 +194,7 @@ def read_setting(setting:Literal['bits', 'image_path', 'open_image_on_start']):
 
 #GUI
 class ListEntry:
-	def __init__(self, master, data:dict = {"name":'name', "password":'pass', "email":'email', "username":'user', "info":'info'}):
+	def __init__(self, master, data:dict = {"name":'', "password":'', "email":'', "username":'', "info":''}):
 		global list_entries
 		
 		self.frame = tk.Frame(master)
@@ -202,28 +202,28 @@ class ListEntry:
 
 		self.entries:list[tk.Entry] = []
 		self.data:dict = {}
-		for idx, x in enumerate(data.items()):
+		for x in data.items():
 			key = x[0]
 			self.data[key] = tk.StringVar(None, data[key])
-			value = f'{self.data[key].get()}'
-			print(value)
-			func = lambda:exec(f'print("{key}", "{self.data[key].get()}")')
-			""" def func():
-				print(key, value) """
-			if key == 'password':
-				self.entries.append(tk.Button(self.frame, width=15, text='•'*len(self.data[key].get()), command=func))
-				self.entries[-1].grid(row = 0, column=idx)
-			elif key != 'info':
-				self.entries.append(tk.Button(self.frame, width=15, textvariable=self.data[key], command=func))
-				self.entries[-1].grid(row = 0, column=idx)
+
+		self.entries.append(tk.Button(self.frame, width=15, textvariable=self.data['name'], command=lambda:pc.copy(self.data['name'].get())))
+		self.entries.append(tk.Button(self.frame, width=15, text='•'*len(self.data['password'].get()), command=lambda:pc.copy(self.data['password'].get())))
+		self.entries.append(tk.Button(self.frame, width=15, textvariable=self.data['email'], command=lambda:pc.copy(self.data['email'].get())))
+		self.entries.append(tk.Button(self.frame, width=15, textvariable=self.data['username'], command=lambda:pc.copy(self.data['username'].get())))
+
+		for idx, x in enumerate(self.entries):
+			x.grid(row = 0, column=idx+1)
 
 		self.strength = tk.StringVar(None)
 		self.check_pass_strength()
 		self.entries.append(tk.Label(self.frame, textvariable=self.strength))
-		self.entries[-1].grid(row=0, column=4)
+		self.entries[-1].grid(row=0, column=5)
+
+		self.edit_button = tk.Button(self.frame, text="Edit", command=self.edit)
+		self.edit_button.grid(row=0, column=0, padx=5, pady=5)
 		
 		self.delete_button = tk.Button(self.frame, text="-", command=self.delete_entry)
-		self.delete_button.grid(row=0, column=5, padx=5, pady=5)
+		self.delete_button.grid(row=0, column=6, padx=5, pady=5)
 
 		if not list_entries:
 			self.top()
@@ -258,6 +258,7 @@ class ListEntry:
 		for x in self.entries:
 			x.grid(row = 1)
 
+		self.edit_button.grid(row=1)
 		self.delete_button.grid(row=1)
 
 	def get_data(self):
@@ -268,7 +269,20 @@ class ListEntry:
 		
 		data["strength"] = self.strength.get()
 		return data
-		
+
+	def edit(self):
+		global root
+		win = tk.Toplevel(master=root)
+		win.title('edit')
+		width = 500
+		height = 400
+		win.geometry(f"{width}x{height}")
+		win.focus()
+		win.grab_set()
+		aline_windows(root, win)
+
+		win.mainloop()
+
 def check_password_strength(password:str) -> float:
    # Count the number of uppercase letters, lowercase letters, digits, and special characters
    num_uppercase = sum(1 for char in password if char.isupper())
