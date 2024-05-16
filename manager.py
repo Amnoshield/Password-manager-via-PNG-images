@@ -175,14 +175,14 @@ def create_Order3(width:int, hight:int, key:str, colors:int = 4, bits:int = 3)->
 				y.pop(randY)
 
 @loading_screen('Sorting ...')
-def sort_list(unsorted:list, idx:int):
+def sort_list(unsorted:list, key:str):
 	temp = deepcopy(unsorted)
 
-	key = lambda a:a[idx]
-	unsorted.sort(key=key)
+	func = lambda a:a[key]
+	unsorted.sort(key=func)
 	
 	if temp == unsorted:
-		unsorted.sort(key=key, reverse=True)
+		unsorted.sort(key=func, reverse=True)
 
 def change_setting(setting:Literal['bits', 'image_path', 'open_image_on_start'], value):
 	settings = json.load(open('settings.json', 'r'))
@@ -194,30 +194,36 @@ def read_setting(setting:Literal['bits', 'image_path', 'open_image_on_start']):
 
 #GUI
 class ListEntry:
-	def __init__(self, master, text:list[str] = ['', '', '', ''], make_pass = False):
+	def __init__(self, master, data:dict = {"name":'name', "password":'pass', "email":'email', "username":'user', "info":'info'}):
 		global list_entries
-
-		if make_pass == True: text[1] = gen_password()
 		
 		self.frame = tk.Frame(master)
 		self.frame.grid(sticky="nswe")
 
-		row_pos = 0
-
 		self.entries:list[tk.Entry] = []
-		for idx, x in enumerate(text):
-			temp = tk.StringVar()
-			temp.set(x)
-			self.entries.append(tk.Entry(self.frame, width=20, textvariable=temp))
-			self.entries[-1].grid(row = row_pos, column=idx)
+		self.data:dict = {}
+		for idx, x in enumerate(data.items()):
+			key = x[0]
+			self.data[key] = tk.StringVar(None, data[key])
+			value = f'{self.data[key].get()}'
+			print(value)
+			func = lambda:exec(f'print("{key}", "{self.data[key].get()}")')
+			""" def func():
+				print(key, value) """
+			if key == 'password':
+				self.entries.append(tk.Button(self.frame, width=15, text='•'*len(self.data[key].get()), command=func))
+				self.entries[-1].grid(row = 0, column=idx)
+			elif key != 'info':
+				self.entries.append(tk.Button(self.frame, width=15, textvariable=self.data[key], command=func))
+				self.entries[-1].grid(row = 0, column=idx)
 
-		self.strength = tk.Label(self.frame)
-		self.strength.grid(row=row_pos, column=len(self.entries))
-		self.entries[1].bind(sequence='<KeyRelease>', func=lambda a:self.check_pass_strength())
+		self.strength = tk.StringVar(None)
 		self.check_pass_strength()
-
+		self.entries.append(tk.Label(self.frame, textvariable=self.strength))
+		self.entries[-1].grid(row=0, column=4)
+		
 		self.delete_button = tk.Button(self.frame, text="-", command=self.delete_entry)
-		self.delete_button.grid(row=row_pos, column=2+len(self.entries), padx=5, pady=5)
+		self.delete_button.grid(row=0, column=5, padx=5, pady=5)
 
 		if not list_entries:
 			self.top()
@@ -233,15 +239,15 @@ class ListEntry:
 			list_entries[0].top()
 
 	def check_pass_strength(self):
-		self.strength.config(text=f'{check_password_strength(self.entries[1].get()):.1f}%')
+		self.strength.set(f'{check_password_strength(self.data["password"].get()):.1f}%')
 		self.frame.update_idletasks()
 
 	def top(self):
-		self.b_name = tk.Button(self.frame, text='Name', command=lambda:(sort_list(get_data(), 0), load_all()))
-		self.b_password = tk.Button(self.frame, text='Password', command=lambda:(sort_list(get_data(), 1), load_all()))
-		self.b_email = tk.Button(self.frame, text='Email', command=lambda:(sort_list(get_data(), 2), load_all()))
-		self.b_username = tk.Button(self.frame, text='Username', command=lambda:(sort_list(get_data(), 3), load_all()))
-		self.b_strength = tk.Button(self.frame, text='Strength', command=lambda:(sort_list(get_data(), 4), load_all()))
+		self.b_name = tk.Button(self.frame, text='Name', command=lambda:(sort_list(get_data(), "name"), load_all()))
+		self.b_password = tk.Button(self.frame, text='Password', command=lambda:(sort_list(get_data(), "password"), load_all()))
+		self.b_email = tk.Button(self.frame, text='Email', command=lambda:(sort_list(get_data(), "email"), load_all()))
+		self.b_username = tk.Button(self.frame, text='Username', command=lambda:(sort_list(get_data(), "username"), load_all()))
+		self.b_strength = tk.Button(self.frame, text='Strength', command=lambda:(sort_list(get_data(), "strength"), load_all()))
 		
 		self.b_name.grid(row=0, column=0)
 		self.b_password.grid(row=0, column=1)
@@ -253,12 +259,15 @@ class ListEntry:
 			x.grid(row = 1)
 
 		self.delete_button.grid(row=1)
-		self.strength.grid(row=1)
 
 	def get_data(self):
-		temp: list = [x.get() for x in self.entries]
-		temp.append(float(self.strength.cget("text")[:-1]))
-		return temp
+		data:dict = {}
+		for x in self.data.items():
+			key, value = x
+			data[key] = value.get()
+		
+		data["strength"] = self.strength.get()
+		return data
 		
 def check_password_strength(password:str) -> float:
    # Count the number of uppercase letters, lowercase letters, digits, and special characters
@@ -316,8 +325,8 @@ def save_data(password_ = None):
 	else: password = password_
 
 	new = []
-	for x in [x[:-1] for x in get_data()]:
-		new.append('\t'.join(x))
+	for x in get_data(exclude=['strength']):
+		new.append('\t'.join(x.values()))
 	long:str = '\n'.join(new)
 
 	data = encrypt(long, key=password)
@@ -333,10 +342,10 @@ def read_data(data:str, password_ = None):
 	for x in decrypt(data, password).split('\n'):
 		new.append(x.split('\t'))
 	
-	if len(new[0]) == 4:
-		passwords = new
-	else:
-		passwords = []
+	passwords = []
+	if len(new[0]) == 5:
+		for x in new:
+			passwords.append({"name":x[0], "password":x[1], "email":x[2], "username":x[3], "info":x[4]})
 	
 	load_all()
 
@@ -399,7 +408,7 @@ def load_all() -> None:
 		list_entries[0].delete_entry()
 
 	for x in passwords:
-		x=x[:4]
+		x.pop("strength")
 		list_entries.append(ListEntry(pass_frame, x))
 
 	canvas.config(scrollregion=canvas.bbox("all"))
@@ -412,21 +421,22 @@ def ask_for_pass():
 	if isinstance(user_input, str):
 		password = user_input
 
-def get_data() -> list[list[str]]:
+def get_data(exclude:list = []) -> list[dict]:
 	global list_entries
 	global passwords
-	passwords = [[y.get() for y in x.entries] for x in list_entries]
-
-	strengths = [[float(x.strength.cget("text")[:-1])] for x in list_entries]
-
-	passwords = [x+y for x, y in zip(passwords, strengths)]
+	passwords = []
+	for x in list_entries:
+		temp = x.get_data()
+		for z in exclude:
+			temp.pop(z)
+		passwords.append(temp)
 
 	return passwords
 
 def add_pass():
 	global list_entries
 	global pass_frame
-	list_entries.append(ListEntry(pass_frame, make_pass=True))
+	list_entries.append(ListEntry(pass_frame))
 
 	canvas.config(scrollregion=canvas.bbox('all'))
 	pass_frame.update_idletasks()
@@ -594,6 +604,7 @@ def set_default():
 	settings = json.load(open('default_settings.json', 'r'))
 	json.dump(settings, open('settings.json', 'w'))
 
+#Main
 def main() -> None:
 	global list_entries
 	global pass_frame
