@@ -10,8 +10,7 @@ from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from typing import Generator, Literal
 import random
 import tkinter as tk
-from tkinter import filedialog
-from tkinter import simpledialog
+from tkinter import filedialog, simpledialog
 from PIL import Image, ImageTk
 from time import sleep
 from copy import deepcopy
@@ -33,20 +32,24 @@ def loading_screen(text:str = 'Please wait...'):
 			loading_screen_label.pack()
 			loading_frame.update_idletasks()
 
-			try:
-				result = []
-				def run_func():
-					try: result.append(func(*args, **kwargs))
-					except: pass
+			
+			result = []
+			worked = [True]
+			def run_func():
+				try:
+					output = func(*args, **kwargs)
+					result.append(output)
+				except Exception as e:
+					worked.insert(0, e)
 				
-				t1 = threading.Thread(target=run_func, name='t1')
-				t1.start()
-				while t1.is_alive():
-					sleep(0.1)
-					root.update()
-				
-				result = result[0]
-			except Exception as e:
+			t1 = threading.Thread(target=run_func, name='t1')
+			t1.start()
+			while t1.is_alive():
+				sleep(0.1)
+				root.update()
+			
+			if not isinstance(worked[0], bool):
+				e = worked[0]
 				print(e)
 
 				@loading_screen(f'{e}')
@@ -56,7 +59,8 @@ def loading_screen(text:str = 'Please wait...'):
 			else:
 				loading_screen_label.destroy()
 				loading_frame.update_idletasks()
-				return result
+				if len(result):
+					return result[0]
 		return inner
 	return decorator
 
