@@ -188,12 +188,12 @@ def sort_list(unsorted:list, key:str):
 	if temp == unsorted:
 		unsorted.sort(key=func, reverse=True)
 
-def change_setting(setting:Literal['bits', 'image_path', 'open_image_on_start'], value):
+def change_setting(setting:Literal['bits', 'image_path', 'open_image_on_start', 'ask_for_key_on_start', 'edit_popup_after_creation'], value):
 	settings = json.load(open('settings.json', 'r'))
 	settings[setting] = value
 	json.dump(settings, open('settings.json', 'w'))
 
-def read_setting(setting:Literal['bits', 'image_path', 'open_image_on_start']):
+def read_setting(setting:Literal['bits', 'image_path', 'open_image_on_start', 'ask_for_key_on_start', 'edit_popup_after_creation']):
 	return json.load(open('settings.json', 'r'))[setting]
 
 #GUI
@@ -492,7 +492,9 @@ def add_pass():
 
 	canvas.config(scrollregion=canvas.bbox('all'))
 	pass_frame.update_idletasks()
-	list_entries[-1].edit()
+
+	if read_setting('edit_popup_after_creation'):
+		list_entries[-1].edit()
 
 def gen_password():
 	while True:
@@ -766,6 +768,10 @@ def main() -> None:
 	elif option == 'ask':
 		select_file()
 	del option
+
+	if read_setting('ask_for_key_on_start'):
+		ask_for_pass()
+		
 
 	root.mainloop()
 

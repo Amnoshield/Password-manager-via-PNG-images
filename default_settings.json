@@ -2,5 +2,6 @@
     "bits": 3,
     "image_path": null,
     "open_image_on_start": "yes",
-    "ask_for_key": false
+    "ask_for_key_on_start": false,
+    "edit_popup_after_creation": false
 }
