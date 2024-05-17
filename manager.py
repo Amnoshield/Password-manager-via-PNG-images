@@ -241,7 +241,8 @@ class ListEntry:
 			list_entries[0].top()
 
 	def check_pass_strength(self):
-		self.strength.set(f'{check_password_strength(self.data["password"].get()):.1f}%')
+		temp = f'{check_password_strength(self.data["password"].get()):.1f}%'
+		self.strength.set(f'{temp:<7}')
 		self.fake_pass.set('•'*len(self.data['password'].get()))
 		self.frame.update_idletasks()
 
@@ -295,6 +296,7 @@ class ListEntry:
 		password.bind(sequence='<KeyRelease>', func=lambda a:self.check_pass_strength())
 		password.grid(row=0, column=1, padx=5)
 		tk.Label(frame, textvariable=self.strength).grid(row=0, column=2, padx=5)
+		tk.Label(frame).grid(row=0, column=3, padx=31)
 
 		tk.Label(win, text='Email').pack()
 		tk.Entry(win, textvariable=self.data['email']).pack(pady=5)
@@ -305,9 +307,10 @@ class ListEntry:
 		tk.Label(win, text='Info').pack()
 		text_box = tk.Text(win, height=8, width=50)
 		text_box.insert(tk.END, self.data['info'].get())
+		text_box.bind('<KeyRelease>', lambda a:self.data['info'].set(text_box.get("1.0", "end-1c")))
 		text_box.pack(pady=5)
 
-		tk.Button(win, text='Close', command=lambda:(self.data['info'].set(text_box.get("1.0", "end-1c")), win.destroy())).pack()
+		tk.Button(win, text='Close', command=win.destroy).pack()
 
 		win.mainloop()
 
