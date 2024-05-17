@@ -206,8 +206,10 @@ class ListEntry:
 			key = x[0]
 			self.data[key] = tk.StringVar(None, data[key])
 
+		self.fake_pass = tk.StringVar(None)
+
 		self.entries.append(tk.Button(self.frame, width=15, textvariable=self.data['name'], command=lambda:pc.copy(self.data['name'].get())))
-		self.entries.append(tk.Button(self.frame, width=15, text='•'*len(self.data['password'].get()), command=lambda:pc.copy(self.data['password'].get())))
+		self.entries.append(tk.Button(self.frame, width=15, textvariable=self.fake_pass, command=lambda:pc.copy(self.data['password'].get())))
 		self.entries.append(tk.Button(self.frame, width=15, textvariable=self.data['email'], command=lambda:pc.copy(self.data['email'].get())))
 		self.entries.append(tk.Button(self.frame, width=15, textvariable=self.data['username'], command=lambda:pc.copy(self.data['username'].get())))
 
@@ -216,7 +218,7 @@ class ListEntry:
 
 		self.strength = tk.StringVar(None)
 		self.check_pass_strength()
-		self.entries.append(tk.Label(self.frame, textvariable=self.strength))
+		self.entries.append(tk.Label(self.frame, textvariable=self.strength, padx=8, pady=5))
 		self.entries[-1].grid(row=0, column=5)
 
 		self.edit_button = tk.Button(self.frame, text="Edit", command=self.edit)
@@ -240,20 +242,21 @@ class ListEntry:
 
 	def check_pass_strength(self):
 		self.strength.set(f'{check_password_strength(self.data["password"].get()):.1f}%')
+		self.fake_pass.set('•'*len(self.data['password'].get()))
 		self.frame.update_idletasks()
 
 	def top(self):
-		self.b_name = tk.Button(self.frame, text='Name', command=lambda:(sort_list(get_data(), "name"), load_all()))
-		self.b_password = tk.Button(self.frame, text='Password', command=lambda:(sort_list(get_data(), "password"), load_all()))
-		self.b_email = tk.Button(self.frame, text='Email', command=lambda:(sort_list(get_data(), "email"), load_all()))
-		self.b_username = tk.Button(self.frame, text='Username', command=lambda:(sort_list(get_data(), "username"), load_all()))
-		self.b_strength = tk.Button(self.frame, text='Strength', command=lambda:(sort_list(get_data(), "strength"), load_all()))
+		b_name = tk.Button(self.frame, text='Name', command=lambda:(sort_list(get_data(), "name"), load_all()))
+		b_password = tk.Button(self.frame, text='Password', command=lambda:(sort_list(get_data(), "password"), load_all()))
+		b_email = tk.Button(self.frame, text='Email', command=lambda:(sort_list(get_data(), "email"), load_all()))
+		b_username = tk.Button(self.frame, text='Username', command=lambda:(sort_list(get_data(), "username"), load_all()))
+		b_strength = tk.Button(self.frame, text='Strength', command=lambda:(sort_list(get_data(), "strength"), load_all()))
 		
-		self.b_name.grid(row=0, column=0)
-		self.b_password.grid(row=0, column=1)
-		self.b_email.grid(row=0, column=2)
-		self.b_username.grid(row=0, column=3)
-		self.b_strength.grid(row=0, column=4)
+		b_name.grid(row=0, column=1)
+		b_password.grid(row=0, column=2)
+		b_email.grid(row=0, column=3)
+		b_username.grid(row=0, column=4)
+		b_strength.grid(row=0, column=5)
 
 		for x in self.entries:
 			x.grid(row = 1)
@@ -273,13 +276,38 @@ class ListEntry:
 	def edit(self):
 		global root
 		win = tk.Toplevel(master=root)
-		win.title('edit')
+		win.title('Edit')
 		width = 500
 		height = 400
 		win.geometry(f"{width}x{height}")
 		win.focus()
 		win.grab_set()
 		aline_windows(root, win)
+
+		tk.Label(win, text='Name / site').pack()
+		tk.Entry(win, textvariable=self.data['name']).pack(pady=5)
+
+		tk.Label(win, text='Password').pack()
+		frame = tk.Frame(win)
+		frame.pack()
+		tk.Button(frame, text='Generate password', command=lambda:(self.data['password'].set(gen_password()), self.check_pass_strength())).grid(row=0, column=0, padx=5)
+		password = tk.Entry(frame, textvariable=self.data['password'])
+		password.bind(sequence='<KeyRelease>', func=lambda a:self.check_pass_strength())
+		password.grid(row=0, column=1, padx=5)
+		tk.Label(frame, textvariable=self.strength).grid(row=0, column=2, padx=5)
+
+		tk.Label(win, text='Email').pack()
+		tk.Entry(win, textvariable=self.data['email']).pack(pady=5)
+
+		tk.Label(win, text='Username').pack()
+		tk.Entry(win, textvariable=self.data['username']).pack(pady=5)
+
+		tk.Label(win, text='Info').pack()
+		text_box = tk.Text(win, height=8, width=50)
+		text_box.insert(tk.END, self.data['info'].get())
+		text_box.pack(pady=5)
+
+		tk.Button(win, text='Close', command=lambda:(self.data['info'].set(text_box.get("1.0", "end-1c")), win.destroy())).pack()
 
 		win.mainloop()
 
@@ -422,7 +450,8 @@ def load_all() -> None:
 		list_entries[0].delete_entry()
 
 	for x in passwords:
-		x.pop("strength")
+		if "strength" in x.keys():
+			x.pop("strength")
 		list_entries.append(ListEntry(pass_frame, x))
 
 	canvas.config(scrollregion=canvas.bbox("all"))
@@ -450,10 +479,13 @@ def get_data(exclude:list = []) -> list[dict]:
 def add_pass():
 	global list_entries
 	global pass_frame
+	global canvas
+	
 	list_entries.append(ListEntry(pass_frame))
 
 	canvas.config(scrollregion=canvas.bbox('all'))
 	pass_frame.update_idletasks()
+	list_entries[-1].edit()
 
 def gen_password():
 	while True:
