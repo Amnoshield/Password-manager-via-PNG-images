@@ -65,6 +65,7 @@ def loading_screen(text:str = 'Please wait...'):
 	return decorator
 
 def _timer(iterations:int = 1, timeLimit:int = 0):
+	import time
 	def decorator(func):
 		def inner(*args, **kwargs):
 			numbers = []
