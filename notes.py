@@ -1,11 +1,9 @@
 """ use np.random not random???? """
 
-""" add password hide button???? """
-
-""" use random.getrandbits(8)???? """
-
 """ Improve settings / add more """
 
-""" Add importing and exporting text """
+""" Add key confirmation for saving """
 
-""" make a popup function? """
+""" add convert image function (like jpeg to png) """
+
+""" test np array for randomization? """

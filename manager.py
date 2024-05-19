@@ -64,6 +64,46 @@ def loading_screen(text:str = 'Please wait...'):
 		return inner
 	return decorator
 
+def _timer(iterations:int = 1, timeLimit:int = 0):
+	def decorator(func):
+		def inner(*args, **kwargs):
+			numbers = []
+			print(f"""----------
+Timing function: {func.__name__}
+----------""")
+			for x in range(iterations):
+				if timeLimit and sum(numbers) > timeLimit:
+					break
+				start = time.time()
+				result = func(*deepcopy(args), **deepcopy(kwargs))
+				print(f'iteration count: {x+1}')
+				end = time.time()
+				numbers.append(end-start)
+
+			print(f"""----------
+Timing done on function: {func.__name__}""")
+
+			avg = sum(numbers)/len(numbers)
+			_max = max(numbers)
+			_min = min(numbers)
+			if avg > 60:
+				avg /= 60
+				_max /= 60
+				_min /= 60
+				print(f'avg min: {avg}, max: {_max}, min: {_min}')
+			else:
+				print(f'avg sec: {avg}, max: {_max}, min: {_min}')
+
+			if len(numbers) != iterations:
+				print(f'Timer ended early with {len(numbers)} test(s) run instead of {iterations}')
+
+			print('----------')
+
+
+			return result
+		return inner
+	return decorator
+
 #functions
 @lru_cache(maxsize=None)
 def swap_bits(num: int, bit_index: int, bit_value: int) -> int:
@@ -402,7 +442,7 @@ def read_data(data:str, password_ = None):
 	
 	load_all()
 
-#@loading_screen('Saving...')
+@loading_screen('Saving...')
 def save_file():
 	global file_path
 	global num_of_bits
@@ -432,7 +472,7 @@ def save_file():
 
 	print('saved')
 
-#@loading_screen('Loading...')
+@loading_screen('Loading...')
 def load_file():
 	global file_path
 	global num_of_bits
