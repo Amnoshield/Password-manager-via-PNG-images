@@ -360,6 +360,8 @@ class ListEntry:
 
 		tk.Button(win, text='Close', command=win.destroy).pack()
 
+		win.bind('<Return>', lambda a: win.destroy())
+
 		win.mainloop()
 
 def check_password_strength(password:str) -> float:
