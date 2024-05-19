@@ -18,6 +18,7 @@ import threading
 from functools import lru_cache
 import json
 import pyperclip as pc
+import os
 
 #decorators
 def loading_screen(text:str = 'Please wait...'):
@@ -386,6 +387,50 @@ def check_password_strength(password:str) -> float:
    percentage = (adjusted_score / 10) * 100
    
    return percentage
+
+def convert_to_png():
+	path = filedialog.askopenfilename(
+        filetypes=[
+            ("All image files", "*.png;*.jpg;*.jpeg;*.bmp;*.gif;*.tiff;*.tif;*.ico;*.webp;*.ppm;*.pgm;*.pbm"),
+			("All files", "*.*"),
+            ("PNG files", "*.png"),
+            ("JPEG files", "*.jpg;*.jpeg"),
+            ("Bitmap files", "*.bmp;*.dib"),
+            ("GIF files", "*.gif"),
+            ("TIFF files", "*.tiff;*.tif"),
+            ("ICO files", "*.ico"),
+            ("WebP files", "*.webp"),
+            ("PPM files", "*.ppm"),
+            ("PGM files", "*.pgm"),
+            ("PBM files", "*.pbm"),
+            ("XBM files", "*.xbm"),
+            ("XPM files", "*.xpm"),
+            ("PCX files", "*.pcx"),
+            ("TGA files", "*.tga"),
+            ("SVG files", "*.svg"),
+            ("MSP files", "*.msp")
+        ]
+    )
+
+	image: Image.Image = Image.open(path)
+
+	if image.mode != 'RGBA':
+		image = image.convert('RGBA')
+
+		directory, filename = os.path.split(path)
+		filename_without_ext = os.path.splitext(filename)[0]
+
+		path = filedialog.asksaveasfilename(
+			initialdir=directory,
+			initialfile=f"{filename_without_ext}.png",
+			defaultextension=".png",
+			filetypes=[("PNG files", "*.png")]
+		)
+		if path.endswith('.png'):
+			image.save(path)
+
+	if path.endswith('.png'):
+		select_file(path)
 
 def select_file(path = None):
 	global file_path
@@ -804,6 +849,7 @@ def main() -> None:
 	filemenu.add_command(label='Clear', command=add_noise)
 	filemenu.add_separator()
 	filemenu.add_command(label='Open...', command=select_file)
+	filemenu.add_command(label="Convert file", command=convert_to_png)
 
 	settings_menu = tk.Menu(menu)
 	menu.add_cascade(label='Settings', menu=settings_menu)
