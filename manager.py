@@ -87,43 +87,48 @@ def make_key(key:str, salt_:str = '', iterations:int = 0) -> bytes:
 	)
 	return base64.urlsafe_b64encode(kdf.derive(input_bytes))
 
+def bytes_string_formatting(obj:bytes):
+	""" This makes a string of 1s and 0s from bytes. """
+	global num_of_bits
+	binary_data: str = ''.join(format(byte, '08b') for byte in obj)
+	binary_data += '1' + '0'*(-(len(binary_data)+1)%num_of_bits)
+	return binary_data
+
+def string_bytes_formatting(obj:str):
+	""" This makes bytes from a string of 1s and 0s. """
+	bit = obj[-1]
+	while bit == '0':
+		obj = obj[:-1]
+		bit = obj[-1]
+	obj = obj[:-1]
+
+	return bytes(int(obj[i:i+8], 2) for i in range(0, len(obj), 8))
+
 def encrypt(text:str, key:str) -> str:
 	""" This encrypts and then compresses a string into a string of 1's and 0'1 """
 	new_key: bytes = make_key(key)
 
 	cipher_suite = Fernet(new_key)
-	new_text: bytes = cipher_suite.encrypt(text.encode())
+	new_text: bytes = cipher_suite.encrypt(compress(text.encode()))
 
-	return compress(new_text)
+	return bytes_string_formatting(compress(new_text))
 
 def decrypt(text:str, key:str) -> str:
 	""" This decompresses and then decrypts a string of 1's and 0's """
 	new_key: bytes = make_key(key)
 
 	cipher_suite = Fernet(new_key)
-	new_text: str = cipher_suite.decrypt(decompress(text)).decode()
+	new_text: str = decompress(cipher_suite.decrypt(decompress(string_bytes_formatting(text)))).decode()
 
 	return new_text
 
-def compress(data:bytes) -> str:
-	""" This compresses bytes into a string of 1's and 0's. """
-	global num_of_bits
-	compressed: bytes = zlib.compress(data, level=9)
-	binary_data: str = ''.join(format(byte, '08b') for byte in compressed)
-	binary_data += '1' + '0'*(-(len(binary_data)+1)%num_of_bits)
-	#print(len(binary_data), len(binary_data)%3)
-	return binary_data
+def compress(data:bytes) -> bytes:
+	""" This compresses bytes. """
+	return zlib.compress(data, level=9)
 	
-def decompress(data:str) -> bytes:
-	""" This decompresses a string of 1's and 0's into bytes. """
-	bit = data[-1]
-	while bit == '0':
-		data = data[:-1]
-		bit = data[-1]
-	data = data[:-1]
-
-	data_bytes = bytes(int(data[i:i+8], 2) for i in range(0, len(data), 8))
-	return zlib.decompress(data_bytes)
+def decompress(data:bytes) -> bytes:
+	""" This decompresses bytes. """
+	return zlib.decompress(data)
 
 def create_4d_array4(width:int, hight:int, key:str, colors:int = 4, num_bits = 3) -> Generator[list[list[list[tuple[int, int, int, int]]]], None, None]:
 	random.seed(make_key(key, 'nerd', 20))
@@ -245,8 +250,7 @@ class ListEntry:
 			list_entries[0].top()
 
 	def check_pass_strength(self):
-		temp = f'{check_password_strength(self.data["password"].get()):.1f}%'
-		self.strength.set(f'{temp:<7}')
+		self.strength.set(f'{check_password_strength(self.data["password"].get()):.1f}%')
 		self.fake_pass.set('•'*len(self.data['password'].get()))
 		self.frame.update_idletasks()
 
@@ -398,7 +402,7 @@ def read_data(data:str, password_ = None):
 	
 	load_all()
 
-@loading_screen('Saving...')
+#@loading_screen('Saving...')
 def save_file():
 	global file_path
 	global num_of_bits
@@ -428,7 +432,7 @@ def save_file():
 
 	print('saved')
 
-@loading_screen('Loading...')
+#@loading_screen('Loading...')
 def load_file():
 	global file_path
 	global num_of_bits
@@ -447,6 +451,7 @@ def load_file():
 		data += to_binary(pixel_data[x, y][z], num_of_bits)[::-1][w]
 	
 	read_data(data)
+	print('Loaded')
 
 def load_all() -> None:
 	global list_entries
