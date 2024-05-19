@@ -443,9 +443,50 @@ def read_data(data:str, password_ = None):
 	load_all()
 
 @loading_screen('Saving...')
-def save_file():
+def save_file(check_pass = None):
 	global file_path
 	global num_of_bits
+	global password
+
+	""" def check_pass():
+		global root
+		win = tk.Toplevel(master=root)
+		win.title('Change open file setting')
+		width = 200
+		height = 130
+		win.geometry(f"{width}x{height}")
+		win.focus()
+		win.grab_set()
+		aline_windows(root, win)
+
+		output = []
+
+		tk.Label(win, text="Re enter key:").pack()
+		key = tk.StringVar(win)
+		entry = tk.Entry(win, textvariable=key)
+		entry.pack()
+		win.bind('<Return>', lambda a: (output.append(key.get()), win.quit()))
+
+		tk.Button(win, text='Cancel', command=lambda:(win.quit(), output.clear())).pack()
+
+		win.mainloop()
+		win.destroy()
+
+		if output:
+			return output[0]
+		return
+		
+	if check_pass() != password:		
+		@loading_screen("Keys did not match")
+		def timer():
+			sleep(1.5)
+		timer()
+
+		return """
+	
+	#user_input: str | None = simpledialog.askstring(title="key", prompt="Please enter key:", parent=root)
+	if check_pass != None and check_pass != password:
+		raise Exception("Keys did not match")
 
 	data = save_data()
 	
@@ -752,7 +793,7 @@ def main() -> None:
 
 	filemenu = tk.Menu(menu)
 	menu.add_cascade(label='File', menu=filemenu)
-	filemenu.add_command(label='Save...', command=save_file)
+	filemenu.add_command(label='Save...', command=lambda:save_file(simpledialog.askstring(title="key", prompt="Please enter key:", parent=root)))
 	filemenu.add_separator()
 	filemenu.add_command(label='Export', command=export_binary)
 	filemenu.add_command(label='Import', command=import_binary)
@@ -816,8 +857,7 @@ def main() -> None:
 
 	if read_setting('ask_for_key_on_start'):
 		ask_for_pass()
-		
-
+			
 	root.mainloop()
 
 	swap_bits.cache_clear()	
