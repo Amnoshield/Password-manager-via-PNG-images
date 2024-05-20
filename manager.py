@@ -236,12 +236,14 @@ def sort_list(unsorted:list, key:str):
 		unsorted.sort(key=func, reverse=True)
 
 def change_setting(setting:Literal['bits', 'image_path', 'open_image_on_start', 'ask_for_key_on_start', 'edit_popup_after_creation', 'how_save_image_path'], value):
-	settings = json.load(open('settings.json', 'r'))
+	global settings_path
+	settings = json.load(open(settings_path, 'r'))
 	settings[setting] = value
-	json.dump(settings, open('settings.json', 'w'))
+	json.dump(settings, open(settings_path, 'w'))
 
 def read_setting(setting:Literal['bits', 'image_path', 'open_image_on_start', 'ask_for_key_on_start', 'edit_popup_after_creation', 'how_save_image_path']):
-	return json.load(open('settings.json', 'r'))[setting]
+	global settings_path
+	return json.load(open(settings_path, 'r'))[setting]
 
 #GUI
 class ListEntry:
@@ -496,44 +498,7 @@ def save_file(check_pass = None):
 	global file_path
 	global num_of_bits
 	global password
-
-	""" def check_pass():
-		global root
-		win = tk.Toplevel(master=root)
-		win.title('Change open file setting')
-		width = 200
-		height = 130
-		win.geometry(f"{width}x{height}")
-		win.focus()
-		win.grab_set()
-		aline_windows(root, win)
-
-		output = []
-
-		tk.Label(win, text="Re enter key:").pack()
-		key = tk.StringVar(win)
-		entry = tk.Entry(win, textvariable=key)
-		entry.pack()
-		win.bind('<Return>', lambda a: (output.append(key.get()), win.quit()))
-
-		tk.Button(win, text='Cancel', command=lambda:(win.quit(), output.clear())).pack()
-
-		win.mainloop()
-		win.destroy()
-
-		if output:
-			return output[0]
-		return
-		
-	if check_pass() != password:		
-		@loading_screen("Keys did not match")
-		def timer():
-			sleep(1.5)
-		timer()
-
-		return """
 	
-	#user_input: str | None = simpledialog.askstring(title="key", prompt="Please enter key:", parent=root)
 	if check_pass != None and check_pass != password:
 		raise Exception("Keys did not match")
 
@@ -791,8 +756,12 @@ def change_open_file():
 	win.mainloop()
 
 def set_default():
-	settings = json.load(open('default_settings.json', 'r'))
-	json.dump(settings, open('settings.json', 'w'))
+	global settings_path
+	base_path = os.path.dirname(os.path.abspath(__file__))
+	default_path = os.path.join(base_path, 'default_settings.json')
+	
+	settings = json.load(open(default_path, 'r'))
+	json.dump(settings, open(settings_path, 'w'))
 
 def image_path_setting():
 	global root
@@ -844,6 +813,10 @@ def main() -> None:
 	global loading_frame
 	global loading_screen_label
 	global root
+	global settings_path
+
+	base_path = os.path.dirname(os.path.abspath(__file__))
+	settings_path = os.path.join(base_path, 'settings.json')
 
 	num_of_bits = read_setting('bits')
 	password = ''
