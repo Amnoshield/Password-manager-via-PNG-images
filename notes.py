@@ -1,1 +1,3 @@
-""" Improve settings / add more """
+""" Improve settings / add more
+Add a delete file path button.
+"""

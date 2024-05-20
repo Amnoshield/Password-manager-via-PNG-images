@@ -235,12 +235,12 @@ def sort_list(unsorted:list, key:str):
 	if temp == unsorted:
 		unsorted.sort(key=func, reverse=True)
 
-def change_setting(setting:Literal['bits', 'image_path', 'open_image_on_start', 'ask_for_key_on_start', 'edit_popup_after_creation'], value):
+def change_setting(setting:Literal['bits', 'image_path', 'open_image_on_start', 'ask_for_key_on_start', 'edit_popup_after_creation', 'how_save_image_path'], value):
 	settings = json.load(open('settings.json', 'r'))
 	settings[setting] = value
 	json.dump(settings, open('settings.json', 'w'))
 
-def read_setting(setting:Literal['bits', 'image_path', 'open_image_on_start', 'ask_for_key_on_start', 'edit_popup_after_creation']):
+def read_setting(setting:Literal['bits', 'image_path', 'open_image_on_start', 'ask_for_key_on_start', 'edit_popup_after_creation', 'how_save_image_path']):
 	return json.load(open('settings.json', 'r'))[setting]
 
 #GUI
@@ -793,6 +793,26 @@ def set_default():
 	settings = json.load(open('default_settings.json', 'r'))
 	json.dump(settings, open('settings.json', 'w'))
 
+def image_path_setting():
+	global root
+	win = tk.Toplevel(master=root)
+	win.title('Image path')
+	width = 200
+	height = 130
+	win.geometry(f"{width}x{height}")
+	win.focus()
+	win.grab_set()
+	aline_windows(root, win)
+
+	tk.Label(win,text='Note: these features will only take effect with {open image on start} set to yes').pack()
+
+	#Most recently opened
+	#Only this file
+
+	tk.Button(win, text='Close', command=win.destroy).pack()
+
+	win.mainloop()
+
 #Main
 def main() -> None:
 	global list_entries
@@ -855,9 +875,12 @@ def main() -> None:
 	menu.add_cascade(label='Settings', menu=settings_menu)
 	settings_menu.add_command(label='Change bits', command=change_bits)
 	settings_menu.add_command(label='Startup image', command=change_open_file)
+	ask_value = tk.BooleanVar(None, read_setting('ask_for_key_on_start'))
+	settings_menu.add_checkbutton(label='Ask for key', variable=ask_value, onvalue=True, offvalue=False, command=lambda:change_setting('ask_for_key_on_start', ask_value.get()))
+	edit_popup = tk.BooleanVar(None, read_setting('edit_popup_after_creation'))
+	settings_menu.add_checkbutton(label='Edit new passwords', variable=edit_popup, onvalue=True, offvalue=False, command=lambda:change_setting('edit_popup_after_creation', edit_popup.get()))
 	settings_menu.add_separator()
 	settings_menu.add_command(label='Reset to default', command=set_default)
-
 
 	#canvas
 	canvas = tk.Canvas(root) 
