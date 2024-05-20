@@ -1,19 +1,18 @@
-import subprocess
+from PyInstaller.__main__ import run
 
 def package_with_pyinstaller():
     app_name = 'ImageManager'
     output_dir = './app'
-    #python -m
-    pyinstaller_cmd = [
-        'PyInstaller',
+    opts = [
         '--onefile',
-        f'--name {app_name}',
-        f'--distpath {output_dir}/dist',
-        f'--workpath {output_dir}/build',
+        f'--name={app_name}',
+        '--add-data "settings.json;."',
+        '--add-data "default_settings.json;."',
+        f'--distpath={output_dir}/dist',
+        f'--workpath={output_dir}/build',
         'manager.py'
-    ]
-    subprocess.run(pyinstaller_cmd)
+        ]
+    run(opts)
 
-# Usage example
 if __name__ == "__main__":
     package_with_pyinstaller()
