@@ -445,7 +445,8 @@ def select_file(path = None):
 	if path:
 		try:
 			file_path = path
-			change_setting('image_path', path)
+			if read_setting('how_save_image_path') == 'recent':
+				change_setting('image_path', path)
 			image: Image.Image = Image.open(file_path)
 
 			if image.mode != 'RGBA':
@@ -797,17 +798,32 @@ def image_path_setting():
 	global root
 	win = tk.Toplevel(master=root)
 	win.title('Image path')
-	width = 200
-	height = 130
+	width = 220
+	height = 150
 	win.geometry(f"{width}x{height}")
 	win.focus()
 	win.grab_set()
 	aline_windows(root, win)
 
-	tk.Label(win,text='Note: these features will only take effect with {open image on start} set to yes').pack()
+	tk.Label(win,text='Note: these features will only take effect\nwith {open image on start} set to yes').pack()
 
-	#Most recently opened
-	#Only this file
+	how_save = tk.StringVar(None, read_setting('how_save_image_path'))
+
+	tk.Radiobutton(win, variable=how_save, value='recent', text='Most recently opened', command=lambda:change_setting('how_save_image_path', how_save.get())).pack()
+
+	tk.Radiobutton(win, variable=how_save, value='this', text='Only this file', command=lambda:change_setting('how_save_image_path', how_save.get())).pack()
+
+	def inner():
+		new_path = filedialog.askopenfilename(filetypes=[("PNG files", "*.png")])
+		if new_path:
+			path.set(new_path)
+			change_setting('image_path', new_path)
+
+	frame = tk.Frame(win)
+	frame.pack()
+	path = tk.StringVar(value=read_setting('image_path'))
+	tk.Entry(frame, textvariable=path, state='readonly').grid(row=0, column=0)
+	tk.Button(frame, text='Select file', command=inner).grid(row=0, column=1)
 
 	tk.Button(win, text='Close', command=win.destroy).pack()
 
@@ -874,7 +890,11 @@ def main() -> None:
 	settings_menu = tk.Menu(menu)
 	menu.add_cascade(label='Settings', menu=settings_menu)
 	settings_menu.add_command(label='Change bits', command=change_bits)
+	settings_menu.add_separator()
 	settings_menu.add_command(label='Startup image', command=change_open_file)
+	settings_menu.add_command(label='Image path', command=image_path_setting)
+	settings_menu.add_command(label='Delete image path', command=lambda:change_setting('image_path', None))
+	settings_menu.add_separator()
 	ask_value = tk.BooleanVar(None, read_setting('ask_for_key_on_start'))
 	settings_menu.add_checkbutton(label='Ask for key', variable=ask_value, onvalue=True, offvalue=False, command=lambda:change_setting('ask_for_key_on_start', ask_value.get()))
 	edit_popup = tk.BooleanVar(None, read_setting('edit_popup_after_creation'))

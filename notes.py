@@ -1,3 +1,1 @@
-""" Improve settings / add more
-Add a delete file path button.
-"""
+""" Make installer / compile """
