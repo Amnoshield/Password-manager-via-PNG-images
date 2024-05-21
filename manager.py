@@ -922,7 +922,10 @@ def main() -> None:
 
 	if read_setting('ask_for_key_on_start'):
 		ask_for_pass()
-			
+
+	icon = tk.PhotoImage(file = 'Icon_v5.ico')
+	root.iconphoto(default = False, image1 = icon)
+
 	root.mainloop()
 
 	swap_bits.cache_clear()	
