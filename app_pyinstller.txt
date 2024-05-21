@@ -1,2 +1,0 @@
-
-python -m PyInstaller --onedir --noconsole --name ImageManager --add-data "settings.json;." --add-data "default_settings.json;." --distpath ./app/dist --workpath ./app/build manager.py
