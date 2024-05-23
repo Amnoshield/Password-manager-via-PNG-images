@@ -173,7 +173,7 @@ def decompress(data:bytes) -> bytes:
 	""" This decompresses bytes. """
 	return zlib.decompress(data)
 
-def create_4d_array4(width:int, hight:int, key:str, colors:int = 4, num_bits = 3) -> Generator[list[list[list[tuple[int, int, int, int]]]], None, None]:
+""" def create_4d_array4(width:int, hight:int, key:str, colors:int = 4, num_bits = 3) -> Generator[list[list[list[tuple[int, int, int, int]]]], None, None]:
 	random.seed(make_key(key, 'nerd', 20))
 	xList = list(range(width))
 	random.shuffle(xList)
@@ -225,6 +225,42 @@ def create_Order3(width:int, hight:int, key:str, colors:int = 4, bits:int = 3)->
 			y[randY].pop(randZ)
 			if not len(y[randY]):
 				y.pop(randY)
+ """
+
+def create_rand_order(width:int, height:int, key, num_bits:int, colors:int = 4):
+	random.seed(make_key(key, 'nerd', 20))
+
+	nums = list(range(colors))
+	random.shuffle(nums)
+	direction = random.choice([-1, 1])
+	bits = list(range(num_bits))
+	for _ in range(colors):
+		num = nums.pop(0)
+		x_list = []
+		y_list = []
+		x_mask = list(range(width))
+		y_mask = list(range(height))
+		
+		while x_mask and y_mask:
+			if x_mask:
+				rand = random.choice(x_mask)
+				x_mask.remove(rand)
+				x_list.append(rand)
+				for y in y_list:
+					for bit in bits:
+						yield rand, y, (rand+y+num)%colors, bit
+			random.shuffle(x_list)
+			random.shuffle(bits)
+
+			if y_mask:
+				rand = random.choice(y_mask)
+				y_mask.remove(rand)
+				y_list.append(rand)
+				for x in x_list:
+					for bit in bits:
+						yield x, rand, (x+rand+num)%colors, bit
+			random.shuffle(y_list)
+			random.shuffle(bits)
 
 @loading_screen('Sorting ...')
 def sort_list(unsorted:list, key:str):
@@ -503,13 +539,16 @@ def save_file(check_pass = None):
 	if check_pass != None and check_pass != password:
 		raise Exception("Keys did not match")
 
-	data = save_data()
-	
 	image = Image.open(file_path)
 	pixel_data = image.load()
-
 	width, hight = image.size
-	order = create_Order3(width, hight, password, bits=num_of_bits)
+
+	data = save_data()
+	
+	if len(data) >= width*hight*num_of_bits*4:
+		raise Exception("Not enough space, Increase bits or use a bigger image")
+
+	order = create_rand_order(width, hight, password, num_bits=num_of_bits)
 
 	for bit in data:
 		x, y, z, w = next(order)
@@ -537,7 +576,7 @@ def load_file():
 	image = Image.open(file_path)
 	pixel_data = image.load()
 	width, hight = image.size
-	order = create_Order3(width, hight, password, bits=num_of_bits)
+	order = create_rand_order(width, hight, password, num_bits=num_of_bits)
 
 	data = ''
 	while True:
