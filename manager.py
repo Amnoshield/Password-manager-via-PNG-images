@@ -273,14 +273,12 @@ def sort_list(unsorted:list, key:str):
 		unsorted.sort(key=func, reverse=True)
 
 def change_setting(setting:Literal['bits', 'image_path', 'open_image_on_start', 'ask_for_key_on_start', 'edit_popup_after_creation', 'how_save_image_path'], value):
-	global settings_path
-	settings = json.load(open(settings_path, 'r'))
+	settings = json.load(open('settings.json', 'r'))
 	settings[setting] = value
-	json.dump(settings, open(settings_path, 'w'))
+	json.dump(settings, open('settings.json', 'w'))
 
 def read_setting(setting:Literal['bits', 'image_path', 'open_image_on_start', 'ask_for_key_on_start', 'edit_popup_after_creation', 'how_save_image_path']):
-	global settings_path
-	return json.load(open(settings_path, 'r'))[setting]
+	return json.load(open('settings.json', 'r'))[setting]
 
 #GUI
 class ListEntry:
@@ -796,12 +794,8 @@ def change_open_file():
 	win.mainloop()
 
 def set_default():
-	global settings_path
-	base_path = os.path.dirname(os.path.abspath(__file__))
-	default_path = os.path.join(base_path, 'default_settings.json')
-	
-	settings = json.load(open(default_path, 'r'))
-	json.dump(settings, open(settings_path, 'w'))
+	settings = json.load(open('default_settings.json', 'r'))
+	json.dump(settings, open('settings.json', 'w'))
 
 def image_path_setting():
 	global root
@@ -853,10 +847,6 @@ def main() -> None:
 	global loading_frame
 	global loading_screen_label
 	global root
-	global settings_path
-
-	base_path = os.path.dirname(os.path.abspath(__file__))
-	settings_path = os.path.join(base_path, 'settings.json')
 
 	num_of_bits = read_setting('bits')
 	password = ''
