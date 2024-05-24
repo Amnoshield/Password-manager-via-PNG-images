@@ -173,60 +173,6 @@ def decompress(data:bytes) -> bytes:
 	""" This decompresses bytes. """
 	return zlib.decompress(data)
 
-""" def create_4d_array4(width:int, hight:int, key:str, colors:int = 4, num_bits = 3) -> Generator[list[list[list[tuple[int, int, int, int]]]], None, None]:
-	random.seed(make_key(key, 'nerd', 20))
-	xList = list(range(width))
-	random.shuffle(xList)
-	yList = list(range(hight))
-	random.shuffle(yList)
-
-	counter = 0
-
-	y=yList[counter]
-	yield [[[(x, y, z, w) for w in range(num_bits)] for z in range(colors)] for x in range(width)]
-	#print('swap')
-	while True:
-		#print('X avoiding', yList[:counter+1])
-
-		x=xList[counter]
-		yield [[[(x, y, z, w) for w in range(num_bits)] for z in range(colors)] for y in range(hight) if y not in yList[:counter+1]]
-
-		counter += 1
-		if counter >= min([width, hight]): break
-
-		#print('swap')
-
-		#print('Y avoiding', xList[:counter])
-
-		y=yList[counter]
-		yield [[[(x, y, z, w) for w in range(num_bits)] for z in range(colors)] for x in range(width) if x not in xList[:counter]]
-		
-		#print('swap')
-
-	#input(f'{counter}, {[width, hight]}, {min([width, hight])}')
-	
-def create_Order3(width:int, hight:int, key:str, colors:int = 4, bits:int = 3)-> Generator[tuple[int, int, int, int], None, None]:
-	array: Generator[list[list[list[tuple[int, int, int, int]]]], None, None] = create_4d_array4(width, hight, key, colors, num_bits=bits)
-	random.seed(make_key(key, 'hehe', 7))
-
-	for y in array:
-		random.shuffle(y)
-		for z in y:
-			random.shuffle(z)
-			for w in z:
-				random.shuffle(w)
-	
-		while len(y):
-			randY = random.randint(0, len(y)-1)
-			randZ = random.randint(0, len(y[randY])-1)
-			
-			yield from y[randY][randZ]
-			
-			y[randY].pop(randZ)
-			if not len(y[randY]):
-				y.pop(randY)
- """
-
 def create_rand_order(width:int, height:int, key, num_bits:int, colors:int = 4):
 	random.seed(make_key(key, 'nerd', 20))
 
@@ -862,6 +808,8 @@ def main() -> None:
 	root.geometry(f"{width}x{height}")
 	root.pack_propagate(False)
 
+	root.iconbitmap(sys.executable)
+
 	#details
 	details_frame = tk.Frame(root)
 	
@@ -952,8 +900,6 @@ def main() -> None:
 
 	if read_setting('ask_for_key_on_start'):
 		ask_for_pass()
-
-	root.iconbitmap(sys.executable)
 
 	root.mainloop()
 
