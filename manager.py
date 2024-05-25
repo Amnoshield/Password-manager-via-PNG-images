@@ -192,7 +192,6 @@ def create_rand_order(width:int, height:int, key, num_bits:int, colors:int = 4):
 
 	nums = list(range(colors))
 	random.shuffle(nums)
-	direction = random.choice([-1, 1])
 	bits = list(range(num_bits))
 	for _ in range(colors):
 		num = nums.pop(0)
@@ -478,8 +477,10 @@ def save_data(password_ = None):
 	
 def read_data(data:str, password_ = None):
 	global passwords
-	if not password_: global password
-	else: password = password_
+	if not password_:
+		global password
+	else:
+		password = password_
 
 	new = []
 	for x in decrypt(data, password).split('\n'):
@@ -697,7 +698,7 @@ def import_binary():
 			read_data(filter_data(text.get("1.0", "end-1c")), password_='')
 			win.destroy()
 			if save:
-				save_file()
+				save_file(save_file(simpledialog.askstring(title="key", prompt="Please enter key:", parent=root)))
 			
 		except Exception as e:
 			print(e)
