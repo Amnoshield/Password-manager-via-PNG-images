@@ -23,7 +23,7 @@ DefaultGroupName={#MyAppName}
 AllowNoIcons=yes
 ; Remove the following line to run in administrative install mode (install for all users.)
 PrivilegesRequired=lowest
-OutputDir=C:\Users\asajk\github clone wars\Password-manager\app\installer
+OutputDir=C:\Users\asajk\github clone wars\Password-manager\installer
 OutputBaseFilename=Image Manager Installer
 SetupIconFile=C:\Users\asajk\github clone wars\Password-manager\Icon_v5.ico
 Compression=lzma
