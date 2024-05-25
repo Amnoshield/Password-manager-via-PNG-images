@@ -664,7 +664,7 @@ def filter_data(data:str):
 
 def export_binary():
 	global root
-	data = save_data(password_='')
+	data = save_data()
 	win = tk.Toplevel(master=root)
 	win.title('Export')
 	width = 280
@@ -695,7 +695,7 @@ def import_binary():
 			sleep(1.5)
 		
 		try:
-			read_data(filter_data(text.get("1.0", "end-1c")), password_='')
+			read_data(filter_data(text.get("1.0", "end-1c")))
 			win.destroy()
 			if save:
 				save_file(save_file(simpledialog.askstring(title="key", prompt="Please enter key:", parent=root)))
