@@ -493,43 +493,48 @@ def read_data(data:str, password_ = None):
 	
 	load_all()
 
-@stop_close
-@loading_screen('Saving...')
-def save_file(check_pass = None):
-	global file_path
-	global num_of_bits
+def save_file():
 	global password
 	
-	if check_pass != None and check_pass != password:
+	check_pass = simpledialog.askstring(title="key", prompt="Please enter key:", parent=root, show='•')
+	if check_pass != password:
 		raise Exception("Keys did not match")
-
-	image = Image.open(file_path)
-	pixel_data = image.load()
-	width, hight = image.size
-
-	data = save_data()
 	
-	if len(data) >= width*hight*num_of_bits*4:
-		raise Exception("Not enough space, Increase bits or use a bigger image")
+	@stop_close
+	@loading_screen('Saving...')
+	def inner():
+		global file_path
+		global num_of_bits
 
-	order = create_rand_order(width, hight, password, num_bits=num_of_bits)
+		image = Image.open(file_path)
+		pixel_data = image.load()
+		width, hight = image.size
 
-	for bit in data:
+		data = save_data()
+		
+		if len(data) >= width*hight*num_of_bits*4:
+			raise Exception("Not enough space, Increase bits or use a bigger image")
+
+		order = create_rand_order(width, hight, password, num_bits=num_of_bits)
+
+		for bit in data:
+			x, y, z, w = next(order)
+			color = list(pixel_data[x, y])
+			color[z] = swap_bits(color[z], w, int(bit))
+			color[z] = swap_bits(color[z], num_of_bits, 0)
+
+			pixel_data[x, y] = tuple(color)
+
 		x, y, z, w = next(order)
 		color = list(pixel_data[x, y])
-		color[z] = swap_bits(color[z], w, int(bit))
-		color[z] = swap_bits(color[z], num_of_bits, 0)
-
+		color[z] = swap_bits(color[z], num_of_bits, 1)
 		pixel_data[x, y] = tuple(color)
 
-	x, y, z, w = next(order)
-	color = list(pixel_data[x, y])
-	color[z] = swap_bits(color[z], num_of_bits, 1)
-	pixel_data[x, y] = tuple(color)
+		image.save(file_path)
 
-	image.save(file_path)
+		print('saved')
 
-	print('saved')
+	inner()
 
 @loading_screen('Loading...')
 def load_file():
@@ -571,7 +576,7 @@ def load_all() -> None:
 def ask_for_pass():
 	global password
 	global root
-	user_input: str | None = simpledialog.askstring(title="key", prompt="Please enter key:", parent=root)
+	user_input: str | None = simpledialog.askstring(title="key", prompt="Please enter key:", parent=root, show='•')
 	if isinstance(user_input, str):
 		password = user_input
 
@@ -698,7 +703,7 @@ def import_binary():
 			read_data(filter_data(text.get("1.0", "end-1c")))
 			win.destroy()
 			if save:
-				save_file(save_file(simpledialog.askstring(title="key", prompt="Please enter key:", parent=root)))
+				save_file()
 			
 		except Exception as e:
 			print(e)
@@ -850,7 +855,7 @@ def main() -> None:
 
 	filemenu = tk.Menu(menu)
 	menu.add_cascade(label='File', menu=filemenu)
-	filemenu.add_command(label='Save...', command=lambda:save_file(simpledialog.askstring(title="key", prompt="Please enter key:", parent=root)))
+	filemenu.add_command(label='Save...', command=save_file)
 	filemenu.add_separator()
 	filemenu.add_command(label='Export', command=export_binary)
 	filemenu.add_command(label='Import', command=import_binary)
