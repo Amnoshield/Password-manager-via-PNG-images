@@ -66,6 +66,20 @@ def loading_screen(text:str = 'Please wait...'):
 		return inner
 	return decorator
 
+def stop_close(func):
+	def inner(*args, **kwargs):
+		global root
+		def disable_event():pass
+		root.protocol("WM_DELETE_WINDOW", disable_event)
+		result = None
+		try:
+			result = func(*args, **kwargs)
+		except Exception as e:
+			print(e)
+		root.protocol("WM_DELETE_WINDOW", root.destroy)
+		return result
+	return inner
+
 def _timer(iterations:int = 1, timeLimit:int = 0):
 	import time
 	def decorator(func):
@@ -218,6 +232,7 @@ def sort_list(unsorted:list, key:str):
 	if temp == unsorted:
 		unsorted.sort(key=func, reverse=True)
 
+@stop_close
 def change_setting(setting:Literal['bits', 'image_path', 'open_image_on_start', 'ask_for_key_on_start', 'edit_popup_after_creation', 'how_save_image_path'], value):
 	settings = json.load(open('settings.json', 'r'))
 	settings[setting] = value
@@ -338,7 +353,7 @@ class ListEntry:
 		tk.Entry(win, textvariable=self.data['username']).pack(pady=5)
 
 		tk.Label(win, text='Info').pack()
-		text_box = tk.Text(win, height=8, width=50)
+		text_box = tk.Text(win, height=8, width=50, wrap='word')
 		text_box.insert(tk.END, self.data['info'].get())
 		text_box.bind('<KeyRelease>', lambda a:self.data['info'].set(text_box.get("1.0", "end-1c")))
 		text_box.pack(pady=5)
@@ -371,6 +386,7 @@ def check_password_strength(password:str) -> float:
    
    return percentage
 
+@stop_close
 def convert_to_png():
 	path = filedialog.askopenfilename(
         filetypes=[
@@ -415,6 +431,7 @@ def convert_to_png():
 	if path.endswith('.png'):
 		select_file(path)
 
+@stop_close
 def select_file(path = None):
 	global file_path
 	global file_image
@@ -474,6 +491,7 @@ def read_data(data:str, password_ = None):
 	
 	load_all()
 
+@stop_close
 @loading_screen('Saving...')
 def save_file(check_pass = None):
 	global file_path
@@ -605,6 +623,7 @@ def aline_windows(win1:tk.Tk|tk.Toplevel, win2:tk.Tk|tk.Toplevel, wait_for_size 
 	win2.geometry(f"+{round(x+(w1/2)-(w2/2))}+{round(y+(h1/2)-(h2/2))}")
 
 #Menu
+@stop_close
 def add_noise():
 	global file_path
 	global num_of_bits
@@ -739,6 +758,7 @@ def change_open_file():
 
 	win.mainloop()
 
+@stop_close
 def set_default():
 	settings = json.load(open('default_settings.json', 'r'))
 	json.dump(settings, open('settings.json', 'w'))
