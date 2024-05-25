@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "Image Manager"
-#define MyAppVersion "1.1"
+#define MyAppVersion "1.2"
 #define MyAppPublisher "Amnoshield"
 #define MyAppURL "https://github.com/Amnoshield/Password-manager"
 #define MyAppExeName "ImageManager.exe"
@@ -37,9 +37,9 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 
 [Files]
-Source: "C:\Users\asajk\github clone wars\Password-manager\app\v2\dist\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Users\asajk\github clone wars\Password-manager\app\v2\dist\default_settings.json"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Users\asajk\github clone wars\Password-manager\app\v2\dist\settings.json"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Users\asajk\github clone wars\Password-manager\app\dist\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Users\asajk\github clone wars\Password-manager\app\dist\default_settings.json"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Users\asajk\github clone wars\Password-manager\app\dist\settings.json"; DestDir: "{app}"; Flags: ignoreversion
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]
