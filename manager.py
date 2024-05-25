@@ -241,6 +241,7 @@ def change_setting(setting:Literal['bits', 'image_path', 'open_image_on_start', 
 def read_setting(setting:Literal['bits', 'image_path', 'open_image_on_start', 'ask_for_key_on_start', 'edit_popup_after_creation', 'how_save_image_path']):
 	return json.load(open('settings.json', 'r'))[setting]
 
+
 #GUI
 class ListEntry:
 	def __init__(self, master, data:dict = {"name":'', "password":'', "email":'', "username":'', "info":''}):
@@ -257,10 +258,10 @@ class ListEntry:
 
 		self.fake_pass = tk.StringVar(None)
 
-		self.entries.append(tk.Button(self.frame, width=15, textvariable=self.data['name'], command=lambda:pc.copy(self.data['name'].get())))
-		self.entries.append(tk.Button(self.frame, width=15, textvariable=self.fake_pass, command=lambda:pc.copy(self.data['password'].get())))
-		self.entries.append(tk.Button(self.frame, width=15, textvariable=self.data['email'], command=lambda:pc.copy(self.data['email'].get())))
-		self.entries.append(tk.Button(self.frame, width=15, textvariable=self.data['username'], command=lambda:pc.copy(self.data['username'].get())))
+		self.entries.append(tk.Button(self.frame, width=15, textvariable=self.data['name'], command=lambda:pc.copy(self.data['name'].get()), anchor="w"))
+		self.entries.append(tk.Button(self.frame, width=15, textvariable=self.fake_pass, command=lambda:pc.copy(self.data['password'].get()), anchor="w"))
+		self.entries.append(tk.Button(self.frame, width=15, textvariable=self.data['email'], command=lambda:pc.copy(self.data['email'].get()), anchor="w"))
+		self.entries.append(tk.Button(self.frame, width=15, textvariable=self.data['username'], command=lambda:pc.copy(self.data['username'].get()), anchor="w"))
 
 		for idx, x in enumerate(self.entries):
 			x.grid(row = 0, column=idx+1)

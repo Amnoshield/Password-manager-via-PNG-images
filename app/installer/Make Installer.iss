@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "Image Manager"
-#define MyAppVersion "1.0"
+#define MyAppVersion "1.1"
 #define MyAppPublisher "Amnoshield"
 #define MyAppURL "https://github.com/Amnoshield/Password-manager"
 #define MyAppExeName "ImageManager.exe"

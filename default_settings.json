@@ -4,5 +4,5 @@
     "open_image_on_start": "ask",
     "ask_for_key_on_start": true,
     "edit_popup_after_creation": true,
-    "how_save_image_path": "this"
+    "how_save_image_path": "recent"
 }
