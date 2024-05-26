@@ -1,5 +1,5 @@
 # Auto detect text files and perform LF normalization
 * text=auto
-Amnoshield/Password-manager/app/* linguist-vendored
-Amnoshield/Password-manager/installer/* linguist-vendored
-Amnoshield/Password-manager/.vscode/* linguist-vendored
+Password-manager-via-PNG-images/app/* linguist-vendored
+Password-manager-via-PNG-images/installer/* linguist-vendored
+Password-manager-via-PNG-images/.vscode/* linguist-vendored
