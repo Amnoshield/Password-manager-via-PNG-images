@@ -1,7 +1,7 @@
 # Auto detect text files and perform LF normalization
 * text=auto
-Password-manager-via-PNG-images/app/build/ImageManager/* linguist-vendored
-Password-manager-via-PNG-images/app/build/ImageManager/localpycs/* linguist-vendored
-Password-manager-via-PNG-images/app/dist/* linguist-vendored
-Password-manager-via-PNG-images/installer/* linguist-vendored
-Password-manager-via-PNG-images/.vscode/* linguist-vendored
+Password-manager-via-PNG-images/app/build/ImageManager/** linguist-vendored
+Password-manager-via-PNG-images/app/build/ImageManager/localpycs/** linguist-vendored
+Password-manager-via-PNG-images/app/dist/** linguist-vendored
+Password-manager-via-PNG-images/installer/** linguist-vendored
+Password-manager-via-PNG-images/.vscode/** linguist-vendored
