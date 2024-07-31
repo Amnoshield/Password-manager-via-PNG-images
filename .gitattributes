@@ -1,2 +1,5 @@
 # Auto detect text files and perform LF normalization
 * text=auto
+Password-manager-via-PNG-images/app/** linguist-generated
+Password-manager-via-PNG-images/installer/** linguist-vendored
+Password-manager-via-PNG-images/.vscode/** linguist-generated
