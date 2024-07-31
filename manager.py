@@ -7,7 +7,7 @@ from cryptography.fernet import Fernet
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
-from typing import Generator, Literal
+from typing import Any, Generator, Literal
 import random
 import tkinter as tk
 from tkinter import filedialog, simpledialog
@@ -36,7 +36,7 @@ def loading_screen(text:str = 'Please wait...'):
 
 			
 			result = []
-			worked = [True]
+			worked: list = [True]
 			def run_func():
 				try:
 					output = func(*args, **kwargs)
@@ -79,47 +79,6 @@ def stop_close(func):
 		root.protocol("WM_DELETE_WINDOW", root.destroy)
 		return result
 	return inner
-
-def _timer(iterations:int = 1, timeLimit:int = 0):
-	import time
-	def decorator(func):
-		def inner(*args, **kwargs):
-			numbers = []
-			print(f"""----------
-Timing function: {func.__name__}
-----------""")
-			for x in range(iterations):
-				if timeLimit and sum(numbers) > timeLimit:
-					break
-				start = time.time()
-				result = func(*deepcopy(args), **deepcopy(kwargs))
-				print(f'iteration count: {x+1}')
-				end = time.time()
-				numbers.append(end-start)
-
-			print(f"""----------
-Timing done on function: {func.__name__}""")
-
-			avg = sum(numbers)/len(numbers)
-			_max = max(numbers)
-			_min = min(numbers)
-			if avg > 60:
-				avg /= 60
-				_max /= 60
-				_min /= 60
-				print(f'avg min: {avg}, max: {_max}, min: {_min}')
-			else:
-				print(f'avg sec: {avg}, max: {_max}, min: {_min}')
-
-			if len(numbers) != iterations:
-				print(f'Timer ended early with {len(numbers)} test(s) run instead of {iterations}')
-
-			print('----------')
-
-
-			return result
-		return inner
-	return decorator
 
 #functions
 @lru_cache(maxsize=None)
@@ -249,7 +208,7 @@ class ListEntry:
 		self.frame = tk.Frame(master)
 		self.frame.grid(sticky="nswe")
 
-		self.entries:list[tk.Entry] = []
+		self.entries:list[tk.Button|tk.Label] = []
 		self.data:dict = {}
 		for x in data.items():
 			key = x[0]
@@ -317,8 +276,9 @@ class ListEntry:
 		data:dict = {}
 		for x in self.data.items():
 			key, value = x
-			data[key] = value.get()
-		
+			data[key] = ''.join(filter(lambda a: True if a not in (chr(61441), chr(61442)) else False, value.get()))
+
+
 		data["strength"] = self.strength.get()
 		return data
 
@@ -355,7 +315,7 @@ class ListEntry:
 		tk.Label(win, text='Info').pack()
 		text_box = tk.Text(win, height=8, width=50, wrap='word')
 		text_box.insert(tk.END, self.data['info'].get())
-		text_box.bind('<KeyRelease>', lambda a:self.data['info'].set(text_box.get("1.0", "end-1c")))
+		text_box.bind('<KeyRelease>', lambda e:self.data['info'].set(text_box.get("1.0", "end-1c")))
 		text_box.pack(pady=5)
 
 		tk.Button(win, text='Close', command=win.destroy).pack()
@@ -457,7 +417,7 @@ def select_file(path = None):
 			
 			tk_image = ImageTk.PhotoImage(image)
 			file_details.config(text=file_path.split('/')[-1])
-			file_image.config(text=file_path.split('/')[-1], image=tk_image)
+			file_image.config(text=file_path.split('/')[-1], image=tk_image) # type: ignore
 			details_frame.update_idletasks()
 		except FileNotFoundError as e:
 			print(e)
@@ -468,8 +428,8 @@ def save_data(password_ = None):
 
 	new = []
 	for x in get_data(exclude=['strength']):
-		new.append('\t'.join(x.values()))
-	long:str = '\n'.join(new)
+		new.append(chr(61441).join(x.values())) #This uses char 61441
+	long:str = chr(61442).join(new) #This uses char 61442
 
 	data = encrypt(long, key=password)
 
@@ -483,8 +443,8 @@ def read_data(data:str, password_ = None):
 		password = password_
 
 	new = []
-	for x in decrypt(data, password).split('\n'):
-		new.append(x.split('\t'))
+	for x in decrypt(data, password).split(chr(61442)): #This uses char 61442
+		new.append(x.split(chr(61441))) #This uses char 61441
 	
 	passwords = []
 	if len(new[0]) == 5:
@@ -507,7 +467,7 @@ def save_file():
 		global num_of_bits
 
 		image = Image.open(file_path)
-		pixel_data = image.load()
+		pixel_data: Any = image.load()
 		width, hight = image.size
 
 		data = save_data()
@@ -543,7 +503,7 @@ def load_file():
 	global password
 
 	image = Image.open(file_path)
-	pixel_data = image.load()
+	pixel_data: Any = image.load()
 	width, hight = image.size
 	order = create_rand_order(width, hight, password, num_bits=num_of_bits)
 
@@ -645,7 +605,7 @@ def add_noise():
 	@loading_screen('Adding noise now')
 	def inner():
 		image = Image.open(file_path)
-		pixel_data = image.load()
+		pixel_data: Any = image.load()
 		width, hight = image.size
 
 		random.seed()
