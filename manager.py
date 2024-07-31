@@ -320,7 +320,7 @@ class ListEntry:
 
 		tk.Button(win, text='Close', command=win.destroy).pack()
 
-		win.bind('<Return>', lambda a: win.destroy())
+		win.bind('<Return>', lambda e: win.destroy() if e.widget != text_box else None)
 
 		win.mainloop()
 
