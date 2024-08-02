@@ -1,0 +1,38 @@
+# Python
+*.pyc
+*.pyo
+__pycache__
+
+# Virtual environments
+venv/
+env/
+
+# Build and distribution artifacts
+build/
+dist/
+*.egg-info
+*.whl
+
+# IDE and editor specific files
+*.swp
+*.swo
+*.pyd
+*.pyi
+
+# System files
+*.so
+*.dll
+*.dylib
+
+# Temporary files
+*.tmp
+*.log
+
+# IDE project files
+.project
+*.iml
+*.ipynb
+
+# Other
+*.exe
+*.spec
